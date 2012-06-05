@@ -13,6 +13,10 @@ do
         then
             echo "Going into " $plugin
             tail --lines=+2  $plugin/addon.xml >> $addons_file
+            
+            if []
+
+            fi
     fi
 done
 echo "</addons>" >> $addons_file
@@ -20,4 +24,6 @@ echo "</addons>" >> $addons_file
 echo "Generating checksum file in " $md5_file
 md5sum $addons_file > $md5_file
 
-echo "Done!"
+echo "Now updating the zip files!"
+
+

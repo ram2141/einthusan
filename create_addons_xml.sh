@@ -13,10 +13,6 @@ do
         then
             echo "Going into " $plugin
             tail --lines=+2  $plugin/addon.xml >> $addons_file
-            
-            if []
-
-            fi
     fi
 done
 echo "</addons>" >> $addons_file
@@ -26,4 +22,5 @@ md5sum $addons_file > $md5_file
 
 echo "Now updating the zip files!"
 
+zip -r repo/plugin.video.canadanepal/plugin.video.canadanepal-$1.zip plugin.video.canadanepal/
 

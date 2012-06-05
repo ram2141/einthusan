@@ -1,6 +1,6 @@
 #!/bin/bash
 
-addons_file=humla/addons.xml
+addons_file=humla_repo/addons.xml
 md5_file=$addons_file.md5
 
 echo "Creating new addons.xml file in " $addons_file

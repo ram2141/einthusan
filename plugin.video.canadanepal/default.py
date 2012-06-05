@@ -26,6 +26,7 @@ def CATEGORIES():
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def get_news(m_url, name):
+    get_today_news()
     url = 'http://canadanepal.info/dailynews/update.htm'
     req = urllib2.Request(url)
     response = urllib2.urlopen(req)
@@ -35,7 +36,17 @@ def get_news(m_url, name):
     for u,name in match:
         addDir(name, m_url+u, 2 ,"")
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
-        
+    
+def get_today_news():
+    url = 'http://canadanepal.info/dailynews/'
+    req = urllib2.Request(url)
+    response = urllib2.urlopen(req)
+    link = response.read()
+    response.read()
+    name=re.compile('Today\'s(.+?)<').findall(link)
+    address = get_youtube_link(link)
+    print name[0], address[0]
+    addDir(name[0],address[0],3,"")
 
 def SHOWRADIO(url):
     req = urllib2.Request(url)
@@ -91,7 +102,6 @@ def INDEX(url):
 
 # Show the list of live tv 
 def SHOWLIVETVLIST(url):
-    image_d = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     openfile = open(url, 'r')
     result = openfile.read()
     openfile.close()
@@ -101,8 +111,7 @@ def SHOWLIVETVLIST(url):
         name = re.compile('<name>(.+?)</name').findall(info)
         picture = re.compile('<image>(.+?)</image>').findall(info)
         url = re.compile('<link>(.+?)</link>').findall(info)
-        print (image_d + picture[0])
-        addLink(name[0], url[0], image_d + picture[0]) 
+        addLink(name[0], url[0],picture[0]) 
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
     return
@@ -114,12 +123,12 @@ def get_dailymotion_link(link):
 
 def get_youtube_link(link):
     print "Scraping youtube link"
-    match=re.compile('<.+? value="http://www.youtube.com/v/(.+?)\?').findall(link)
+    match=re.compile('<.+? value="http://www.youtube.com/v/(.+?)"').findall(link)
     return ["http://www.youtube.com/watch?v="+a for a in match]
 
 def get_blip_tv_link(link):
     print "Scraping blip tv link"
-    match=re.compile('<iframe (allowfullscreen="" frameborder="0" height="\d\d\d" )?src="(.+?)\?p=1" (width="\d\d\d")?').findall(link)
+    match=re.compile('<iframe (allowfullscreen="" frameborder="0" height="\d\d\d" )?src="(.+?)\?p=1"').findall(link)
     print match
     return [b for a,b,c in match]
     

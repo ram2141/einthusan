@@ -19,8 +19,3 @@ echo "</addons>" >> $addons_file
 
 echo "Generating checksum file in " $md5_file
 md5sum $addons_file > $md5_file
-
-echo "Now updating the zip files!"
-
-zip -r repo/plugin.video.canadanepal/plugin.video.canadanepal-$1.zip plugin.video.canadanepal/
-

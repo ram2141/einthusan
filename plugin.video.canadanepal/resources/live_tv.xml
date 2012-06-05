@@ -1,0 +1,30 @@
+<channel>
+<name>ABC TV</name>
+<image>ABCtv.jpg</image>
+<link>rtmp://202.79.58.13/live/livestream swfUrl=http://canadanepal.info/tvfilmy/player.swf pageUrl=http://canadanepal.info/live/TV-Filmy.php tcUrl=rtmp://202.79.58.13/live live=1</link>
+</channel>
+
+<channel>
+<name>NTV</name>
+<image>nepal_tv.jpg</image>
+<link>rtmp://streamer.istreamlive.net/1_192_309_60/nepaltelevision swfUrl=http://www.npvideo.com/config-js/player.swf pageUrl=http://www.npvideo.com/channel.php?id=1 tcUrl=rtmp://streamer.istreamlive.net/1_192_309_60 live=1</link>
+</channel>
+
+<channel>
+<name>NTV Plus</name>
+<image>nepal_tv_plus.jpg</image>
+<link>rtmp://streamer.istreamlive.net/1_192_309_60/nepaltelevisionplus swfUrl=http://www.npvideo.com/config-js/player.swf pageUrl=http://www.npvideo.com/channel.php?id=9 tcUrl=rtmp://streamer.istreamlive.net/1_192_309_60 live=1</link>
+</channel>
+
+<channel>
+<name>Sagarmatha TV</name>
+<image>sagarmatha_tv.jpg</image>
+<link>mms://202.52.237.122/sagarmathalive</link>
+</channel>
+
+<channel>
+<name>White Himal</name>
+<image>white_himal.jpg</image>
+<link>rtsp://68.232.185.211:8000/nepal</link>
+</channel>
+

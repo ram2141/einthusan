@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addons>
+<addon id="plugin.video.canadanepal"
+       name="CanadaNepal"
+       version="0.1.11"
+       provider-name="humla">
+    <requires>
+        <import addon="xbmc.python" version="2.0"/>
+        <import addon="plugin.video.bliptv" version="0.4.0"/>
+        <import addon="script.module.urlresolver" version="0.0.1"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource"
+               library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <platform>all</platform>
+        <summary>Watch Nepali TV serials from canadanepal.info</summary>
+        <description>This XBMC plugin allows to watch Nepali TV serials, Live TV, Live FM and more from canadanepal.info</description>
+    </extension>
+</addon>
+</addons>

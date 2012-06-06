@@ -4,6 +4,12 @@
 <link>rtmp://202.79.58.13/live/livestream swfUrl=http://canadanepal.info/tvfilmy/player.swf pageUrl=http://canadanepal.info/live/TV-Filmy.php tcUrl=rtmp://202.79.58.13/live live=1</link>
 </channel>
 
+<progress>
+<name>Nepali Lok Geet</name>
+<image>http://2.bp.blogspot.com/-clJfJAUUwjg/TclSWnUlvgI/AAAAAAAAE1Q/rcMe_F1Aggc/s1600/nepali_dohori.png</image>
+<link>rtmp://cp133304.live.edgefcs.net/live/ playpath=channel1@62057 swfurl=http://www.startv.in/flash/liveplayer.swf pageurl=http://www.npvideo.com/channel.php?id=9 live=true swfvfy=true</link> This is channel V's link
+</progress>
+
 <channel>
 <name>NTV</name>
 <image>http://canadanepal.info/live/images/nepal_tv.jpg</image>

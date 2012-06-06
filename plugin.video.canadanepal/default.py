@@ -130,7 +130,7 @@ def get_blip_tv_link(link):
     print "Scraping blip tv link"
     match=re.compile('<iframe (allowfullscreen="" frameborder="0" height="\d\d\d" )?src="(.+?)\?p=1"').findall(link)
     print match
-    return [b for a,b,c in match]
+    return [b for a,b in match]
     
 def VIDEOLINKS(url,name):
     print "Getting video links"

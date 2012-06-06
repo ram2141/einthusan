@@ -1,3 +1,6 @@
+[B]Version 0.2.1[/B]
+- Fixed the bug with blip.tv link that was created by previous version
+
 [B]Version 0.2.0[/B]
 - Added Today's news
 - Some minor scraping improvements

@@ -1,3 +1,6 @@
+[B]Version 0.2.2[/B]
+- Added a new main section for sports news 
+
 [B]Version 0.2.1[/B]
 - Fixed the bug with blip.tv link that was created by previous version
 

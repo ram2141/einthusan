@@ -23,11 +23,23 @@ def CATEGORIES():
     addDir('Live TV', cwd + '/resources/live_tv.xml', 6, 'http://canadanepal.info/images/banner/onlinetvf.jpg')
     addDir('Live Radio', 'http://canadanepal.info/fm/',4, 'http://canadanepal.info/images/listenfmlogo.gif')
     addDir('Daily News', 'http://canadanepal.info/dailynews/',7,'http://canadanepal.info/images/banner/samachar20.jpg')
+    addDir('Sports News', 'http://canadanepal.info/sports/',8,'http://i.ytimg.com/vi/OnccHCp_sao/0.jpg')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-def get_news(m_url, name):
-    get_today_news()
-    url = 'http://canadanepal.info/dailynews/update.htm'
+def get_sports(url, name):
+    req = urllib2.Request(url)
+    response = urllib2.urlopen(url)
+    link = response.read()
+    response.close()
+    name = re.compile("(Score.+?)<").findall(link)
+    address = get_dailymotion_link(link)
+    print address[0]
+    print name[0]
+    print "***$$$$$*************"
+    addDir(name[0], address[0],3,"")
+    get_previous(url,name,"http://canadanepal.info/sports/update.php")
+
+def get_previous(m_url, name, url):
     req = urllib2.Request(url)
     response = urllib2.urlopen(req)
     link = response.read()
@@ -37,8 +49,7 @@ def get_news(m_url, name):
         addDir(name, m_url+u, 2 ,"")
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
     
-def get_today_news():
-    url = 'http://canadanepal.info/dailynews/'
+def get_news(url, name):
     req = urllib2.Request(url)
     response = urllib2.urlopen(req)
     link = response.read()
@@ -47,13 +58,14 @@ def get_today_news():
     address = get_youtube_link(link)
     print name[0], address[0]
     addDir(name[0],address[0],3,"")
+    get_previous(url, name, 'http://canadanepal.info/dailynews/update.htm')
 
 def SHOWRADIO(url):
     req = urllib2.Request(url)
     response = urllib2.urlopen(req)
     link=response.read()
     response.close()
-    match=re.compile('<li><a href="(.+?)"  class="normal"  target="_self" ><span>(.+?)</span></a></li>').findall(link)
+    match=re.compile('<li><a href="(.+?)"  class="normal"  target="_self" ><span>(.+?)</span>').findall(link)
     for fm_url,name in match:
             addDir(name,url + fm_url,5,"")
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -71,7 +83,6 @@ def AUDIOLINKS(url, name):
     response = urllib2.urlopen(req)
     link=response.read()
     response.close()
-    
     match = get_radio_links(link)
     if (len(match) > 0):
         xbmc.Player().play(match[0], "")
@@ -112,13 +123,19 @@ def SHOWLIVETVLIST(url):
         picture = re.compile('<image>(.+?)</image>').findall(info)
         url = re.compile('<link>(.+?)</link>').findall(info)
         addLink(name[0], url[0],picture[0]) 
-
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
     return
 
 def get_dailymotion_link(link):
     print "Scraping Dailymotion link"
     match=re.compile('<a href="(.+?)" target="_blank"> </a>').findall(link)
+    if (len(match) == 0):
+        print "Dailymotion doing alternate scraping"
+        match=re.compile('<iframe src="(.+?)"').findall(link)
+    length = len(match)
+    while length > 0:
+        match[length-1] = match[length-1].replace('/embed','')
+        length = length - 1
     return match
 
 def get_youtube_link(link):
@@ -153,15 +170,16 @@ def VIDEOLINKS(url,name):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def play_video(url,name):
+    print "**********Play: " + url
     domain = GetDomain(url)
     if domain == "blip.tv":
         req = urllib2.Request(url)
         response = urllib2.urlopen(req)
         res=response.read()
         redirect =  response.geturl()
+        response.close()
         v_id=re.compile('flash%2F(\d\d\d\d\d\d\d)').findall(redirect)
         stream_url= 'plugin://plugin.video.bliptv/?action=play_video&videoid=' + v_id[0]
-        response.close()
     else:    
         stream_url = urlresolver.resolve(url)
     xbmc.Player().play(stream_url, "")
@@ -231,6 +249,7 @@ print "URL: " + str(url)
 # 5: Get link for each radio station
 # 6: Chose live Tv from the main menu
 # 7: Daily News scrapign for link
+# 8: Look for sports in canadanepal.info/sports
 
 if mode==None or url==None or len(url)<1:
         CATEGORIES()
@@ -248,3 +267,5 @@ elif mode==3:
         play_video(url, name) 
 elif mode==7:
         get_news(url, name)
+elif mode==8:
+        get_sports(url, name)

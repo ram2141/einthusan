@@ -1,3 +1,8 @@
+[B]Version 0.2.5[/B]
+- Added a Play All item for videos with multiple links
+- Improved blip.tv scraping
+- Fixed a bug with the Daily News section
+
 [B]Version 0.2.2[/B]
 - Added a new main section for sports news 
 

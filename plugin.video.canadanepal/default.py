@@ -58,7 +58,7 @@ def get_news(url, name):
     address = get_youtube_link(link)
     print name[0], address[0]
     addDir(name[0],address[0],3,"")
-    get_previous(url, name, 'http://canadanepal.info/dailynews/update.htm')
+    get_previous(url, name, 'http://canadanepal.info/dailynews/update.php')
 
 def SHOWRADIO(url):
     req = urllib2.Request(url)
@@ -90,10 +90,14 @@ def AUDIOLINKS(url, name):
 
 # Removes html tags from NAME
 def clear_htmltags(name):
-    tags = ['&quot;', '-', '&amp;', '</font>', '<font color="#bf4040">', '<font color="#af5050">', '<font color="#0e0e0e">', '<strong>', '</strong>', '<font size="2">', '&nbsp;']
+    tags = ['&quot;', '-', '&amp;', '</font>','<strong>', '</strong>', '<font size="2">', '&nbsp;']
     for tag in tags:
         name = name.replace(tag,'')
-    return name
+    name=name+'<font color=\"#bf4040\">'
+    print name
+    match=re.compile('(<font color="#\w\w\w\w\w\w">)*(.+?)<font color="#\w\w\w\w\w\w">*').findall(name)
+    return match[len(match) - 1][1]
+    #return name
 
 # Lists the new episodes of TV series
 def INDEX(url):
@@ -118,7 +122,6 @@ def SHOWLIVETVLIST(url):
     openfile.close()
     match = re.compile('<channel>((.|\n)+?)</channel>').findall(result)
     for info,_ in match:
-        #print info
         name = re.compile('<name>(.+?)</name').findall(info)
         picture = re.compile('<image>(.+?)</image>').findall(info)
         url = re.compile('<link>(.+?)</link>').findall(info)
@@ -145,9 +148,9 @@ def get_youtube_link(link):
 
 def get_blip_tv_link(link):
     print "Scraping blip tv link"
-    match=re.compile('<iframe (allowfullscreen="" frameborder="0" height="\d\d\d" )?src="(.+?)\?p=1"').findall(link)
+    match=re.compile('"(http://(www.)?blip.tv/play/.+?)"').findall(link)
     print match
-    return [b for a,b in match]
+    return [a for a,b in match]
     
 def VIDEOLINKS(url,name):
     print "Getting video links"
@@ -163,14 +166,27 @@ def VIDEOLINKS(url,name):
     i = 1
     length = len(match)
     image_path = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
+    all_url = ""
     for url in match:
+        all_url = all_url + url + " "
         domain = GetDomain(url)
         addDir(domain + " : Part  " + str(i) + " of " + str(length), url, 3, image_path + domain + '.jpg')
         i = i + 1
+    if (i > 2):
+        addDir(domain + " : Play All", all_url, 3, image_path + domain + '.jpg');
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-def play_video(url,name):
-    print "**********Play: " + url
+def play_video(url):
+    log("Playing " + url)
+    all_url = url.split()
+    length = len(all_url)
+    playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    playlist.clear()
+    for one_url in all_url:
+        playlist.add(get_stream_url(one_url))
+    xbmc.Player().play(playlist)
+
+def get_stream_url(url):
     domain = GetDomain(url)
     if domain == "blip.tv":
         req = urllib2.Request(url)
@@ -182,7 +198,8 @@ def play_video(url,name):
         stream_url= 'plugin://plugin.video.bliptv/?action=play_video&videoid=' + v_id[0]
     else:    
         stream_url = urlresolver.resolve(url)
-    xbmc.Player().play(stream_url, "")
+    return stream_url
+    
 
 def get_params():
     param=[]
@@ -216,7 +233,9 @@ def addDir(name,url,mode,iconimage):
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
-        
+
+def log(message):
+    print "[CanadaNepal] " + message
               
 params=get_params()
 url=None
@@ -264,7 +283,7 @@ elif mode==2:
 elif mode==5:
         AUDIOLINKS(url,name)
 elif mode==3:
-        play_video(url, name) 
+        play_video(url) 
 elif mode==7:
         get_news(url, name)
 elif mode==8:

@@ -24,6 +24,7 @@ def CATEGORIES():
     addDir('Live Radio', 'http://canadanepal.info/fm/',4, 'http://canadanepal.info/images/listenfmlogo.gif')
     addDir('Daily News', 'http://canadanepal.info/dailynews/',7,'http://canadanepal.info/images/banner/samachar20.jpg')
     addDir('Sports News', 'http://canadanepal.info/sports/',8,'http://i.ytimg.com/vi/OnccHCp_sao/0.jpg')
+    addDir('Home Page', 'http://canadanepal.info',9,'http://i.ytimg.com/vi/OnccHCp_sao/0.jpg')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def get_sports(url, name):
@@ -35,7 +36,6 @@ def get_sports(url, name):
     address = get_dailymotion_link(link)
     print address[0]
     print name[0]
-    print "***$$$$$*************"
     addDir(name[0], address[0],3,"")
     get_previous(url,name,"http://canadanepal.info/sports/update.php")
 
@@ -90,14 +90,13 @@ def AUDIOLINKS(url, name):
 
 # Removes html tags from NAME
 def clear_htmltags(name):
-    tags = ['&quot;', '-', '&amp;', '</font>','<strong>', '</strong>', '<font size="2">', '&nbsp;']
+    tags = ['&quot;', '-', '&amp;', '</font>','<strong>', '</strong>', '<font size="2">', '&nbsp;', '</span>', '<font color="black">', '<span id="displayName">']
     for tag in tags:
         name = name.replace(tag,'')
     name=name+'<font color=\"#bf4040\">'
-    print name
     match=re.compile('(<font color="#\w\w\w\w\w\w">)*(.+?)<font color="#\w\w\w\w\w\w">*').findall(name)
-    return match[len(match) - 1][1]
-    #return name
+    name = match[len(match) - 1][1]
+    return name
 
 # Lists the new episodes of TV series
 def INDEX(url):
@@ -143,13 +142,15 @@ def get_dailymotion_link(link):
 
 def get_youtube_link(link):
     print "Scraping youtube link"
-    match=re.compile('<.+? value="http://www.youtube.com/v/(.+?)"').findall(link)
+    match=re.compile('"http://www.youtube.com/v/(.+?)"').findall(link)
+    if (len(match) == 0):
+        match = re.compile('"http://www.youtube.com/embed/(.+?)"').findall(link)
+    match = set(match)  
     return ["http://www.youtube.com/watch?v="+a for a in match]
 
 def get_blip_tv_link(link):
     print "Scraping blip tv link"
     match=re.compile('"(http://(www.)?blip.tv/play/.+?)"').findall(link)
-    print match
     return [a for a,b in match]
     
 def VIDEOLINKS(url,name):
@@ -200,6 +201,65 @@ def get_stream_url(url):
         stream_url = urlresolver.resolve(url)
     return stream_url
     
+def get_homePageStuff(url):
+    req = urllib2.Request(url)
+    response = urllib2.urlopen(req)
+    link=response.read()
+    response.close()
+    data = re.compile('Live NTV((.|\n)+?)<!-- Fm Programs -->((.|\n)+?)Raju Lama((.|\n)+?)Calender').findall(link)
+    get_homePageStuffHelper(data[0][0])
+    get_homePageStuffHelper(data[0][4])
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+def get_homePageStuffHelper(data):
+    match = re.compile('.+?<a href="(.+?.html).+?".+?>(.+?)</a>(.+)').findall(data)
+    length = len(match) - 1
+    i = 0
+    log(str(length))
+    while (i < length):
+        currentMatch = match[i]
+        nextMatch = match[i+1]
+        url = currentMatch[0]
+        print currentMatch
+        picture = get_Picture(currentMatch[1])
+        if (url == nextMatch[0]):
+            name = nextMatch[1]
+            i = i + 1
+        else:
+            name = get_Name(currentMatch[2])
+        i = i + 1
+        #log(name)
+        #log(url)
+        #log(picture)
+        if not(name == ""):
+            addDir(clear_htmltags(name), url, 2, picture)
+    if (i < length + 1):
+        currentmatch = match[i]
+        url = currentMatch[0]
+        picture = get_Picture(currentMatch[1])
+        name = get_Name(currentMatch[2])
+        if not(name == ""):
+            addDir(clear_htmltags(name), url, 2, picture)
+        
+def get_Picture(data):
+    print "asdas"
+    print data
+    match=re.compile('<img.+?src="(.+?)"').findall(data)
+    base_url = 'http://canadanepal.info/'
+
+    if len(match) == 0 :
+        return ""
+    link = match[0]
+    print link
+    if (link.startswith("http") == False):
+        link = base_url + link 
+    return link
+
+def get_Name(data):
+    match=re.compile('<a href=.+?>(.+?)</a>').findall(data)    
+    if (len(match) == 0):
+        return ""
+    return match[0]
 
 def get_params():
     param=[]
@@ -269,6 +329,7 @@ print "URL: " + str(url)
 # 6: Chose live Tv from the main menu
 # 7: Daily News scrapign for link
 # 8: Look for sports in canadanepal.info/sports
+# 9: Look for stuff in the homepage
 
 if mode==None or url==None or len(url)<1:
         CATEGORIES()
@@ -288,3 +349,5 @@ elif mode==7:
         get_news(url, name)
 elif mode==8:
         get_sports(url, name)
+elif mode==9:
+        get_homePageStuff(url)

@@ -1,3 +1,7 @@
+[B]Version 0.3.0[/B]
+- Added a "Home Page" main category 
+- Improved Youtube link scraping
+
 [B]Version 0.2.5[/B]
 - Added a Play All item for videos with multiple links
 - Improved blip.tv scraping

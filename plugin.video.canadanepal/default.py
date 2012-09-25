@@ -24,7 +24,7 @@ def CATEGORIES():
     addDir('Live Radio', 'http://canadanepal.info/fm/',4, 'http://canadanepal.info/images/listenfmlogo.gif')
     addDir('Daily News', 'http://canadanepal.info/dailynews/',7,'http://canadanepal.info/images/banner/samachar20.jpg')
     addDir('Sports News', 'http://canadanepal.info/sports/',8,'http://i.ytimg.com/vi/OnccHCp_sao/0.jpg')
-    addDir('Home Page', 'http://canadanepal.info',9,'http://i.ytimg.com/vi/OnccHCp_sao/0.jpg')
+    addDir('Home Page', 'http://canadanepal.info',9,'http://www.statscrop.com/screenshots/y/250/c16/canadanepal/info/thumbnail.jpg')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def get_sports(url, name):
@@ -130,7 +130,7 @@ def SHOWLIVETVLIST(url):
 
 def get_dailymotion_link(link):
     print "Scraping Dailymotion link"
-    match=re.compile('<a href="(.+?)" target="_blank"> </a>').findall(link)
+    match=re.compile('"(http://www.dailymotion.com/video/.+?)"').findall(link)
     if (len(match) == 0):
         print "Dailymotion doing alternate scraping"
         match=re.compile('<iframe src="(.+?)"').findall(link)
@@ -206,7 +206,7 @@ def get_homePageStuff(url):
     response = urllib2.urlopen(req)
     link=response.read()
     response.close()
-    data = re.compile('Live NTV((.|\n)+?)<!-- Fm Programs -->((.|\n)+?)Raju Lama((.|\n)+?)Calender').findall(link)
+    data = re.compile('<div id="bodyimg">((.|\n)+?)<!-- Fm Programs -->((.|\n)+?)<div id="Interview With Raju Lama">((.|\n)+?)<div id="Calender">').findall(link)
     get_homePageStuffHelper(data[0][0])
     get_homePageStuffHelper(data[0][4])
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -228,9 +228,6 @@ def get_homePageStuffHelper(data):
         else:
             name = get_Name(currentMatch[2])
         i = i + 1
-        #log(name)
-        #log(url)
-        #log(picture)
         if not(name == ""):
             addDir(clear_htmltags(name), url, 2, picture)
     if (i < length + 1):
@@ -242,8 +239,6 @@ def get_homePageStuffHelper(data):
             addDir(clear_htmltags(name), url, 2, picture)
         
 def get_Picture(data):
-    print "asdas"
-    print data
     match=re.compile('<img.+?src="(.+?)"').findall(data)
     base_url = 'http://canadanepal.info/'
 

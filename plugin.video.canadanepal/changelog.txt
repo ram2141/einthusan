@@ -1,3 +1,6 @@
+[B]Version 0.3.1[/B]
+- Fixed bugs causing script error on Homepage and Sports news
+
 [B]Version 0.3.0[/B]
 - Added a "Home Page" main category 
 - Improved Youtube link scraping

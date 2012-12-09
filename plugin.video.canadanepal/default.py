@@ -23,8 +23,8 @@ def CATEGORIES():
     addDir('Live TV', cwd + '/resources/live_tv.xml', 6, 'http://canadanepal.info/images/banner/onlinetvf.jpg')
     addDir('Live Radio', 'http://canadanepal.info/fm/',4, 'http://canadanepal.info/images/listenfmlogo.gif')
     addDir('Daily News', 'http://canadanepal.info/dailynews/',7,'http://canadanepal.info/images/banner/samachar20.jpg')
-    addDir('Sports News', 'http://canadanepal.info/sports/',8,'http://i.ytimg.com/vi/OnccHCp_sao/0.jpg')
-    addDir('Home Page', 'http://canadanepal.info',9,'http://www.statscrop.com/screenshots/y/250/c16/canadanepal/info/thumbnail.jpg')
+    addDir('Sports News', 'http://canadanepal.info/sports/',8,'http://nepalitvshow.com/wp-content/uploads/2012/06/Scoreboard.jpg')
+    addDir('Home Page', 'http://canadanepal.info',9,'http://a.webutation.net/3/3/canadanepal.net.jpg')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def get_sports(url, name):
@@ -90,13 +90,12 @@ def AUDIOLINKS(url, name):
 
 # Removes html tags from NAME
 def clear_htmltags(name):
-    tags = ['&quot;', '-', '&amp;', '</font>','<strong>', '</strong>', '<font size="2">', '&nbsp;', '</span>', '<font color="black">', '<span id="displayName">']
-    for tag in tags:
-        name = name.replace(tag,'')
-    name=name+'<font color=\"#bf4040\">'
-    match=re.compile('(<font color="#\w\w\w\w\w\w">)*(.+?)<font color="#\w\w\w\w\w\w">*').findall(name)
-    name = match[len(match) - 1][1]
-    return name
+    p = re.compile(r'<.*?>')
+    result =  p.sub('', name)
+    if (result[0] == '-'):
+        result = result[1:]
+    result = result.replace('&amp;', '').replace('&nbsp;','')
+    return result
 
 # Lists the new episodes of TV series
 def INDEX(url):
@@ -104,7 +103,7 @@ def INDEX(url):
     response = urllib2.urlopen(req)
     link=response.read()
     response.close()
-    match=re.compile('<div><font size="2"><strong>(.+?)<a href="(.+?)" title="" target="_blank">Click').findall(link)
+    match=re.compile('<div><font size="2">(.+?)<a href="(.+?)".+?Click').findall(link)
     image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     for name,url in match:
         name = clear_htmltags(name)
@@ -185,7 +184,8 @@ def play_video(url):
     playlist.clear()
     for one_url in all_url:
         playlist.add(get_stream_url(one_url))
-    xbmc.Player().play(playlist)
+    player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+    player.play(playlist)
 
 def get_stream_url(url):
     domain = GetDomain(url)

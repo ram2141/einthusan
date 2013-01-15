@@ -26,7 +26,7 @@ def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/'
 
-    addDir('Search', '', 6, '')
+    #addDir('Search', '', 6, '')
     addDir('Recent', '', 3,'')
     addDir('Top Viewed', '', 4,'')
     addDir('Top Rated', '', 5,'')

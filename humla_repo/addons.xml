@@ -19,4 +19,21 @@
         <description>This XBMC plugin allows to watch Nepali TV serials, Live TV, Live FM and more videos from canadanepal.info</description>
     </extension>
 </addon>
+<addon id="plugin.video.einthusan"
+       name="Einthusan"
+       version="0.0.1"
+       provider-name="humla">
+    <requires>
+        <import addon="xbmc.python" version="2.0"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource"
+               library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <platform>all</platform>
+        <summary>Watch Hindi movies</summary>
+        <description>This XBMC plugin allows to watch Hindi movies.</description>
+    </extension>
+</addon>
 </addons>

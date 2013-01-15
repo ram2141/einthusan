@@ -1,2 +1,6 @@
+[B]Version 0.0.2[/B] 
+- Fixed video not playing bug
+- The info screen now shows the name of the movie
+
 [B]Version 0.0.1[/B]
 - Initial version of plugin

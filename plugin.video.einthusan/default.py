@@ -168,7 +168,8 @@ def play_video(url,name):
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
     for stream_link in match:
-        playlist.add(stream_link, name)
+        listitem = xbmcgui.ListItem(name)
+        playlist.add(stream_link, listitem)
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
     player.play(playlist)
 

@@ -1,3 +1,8 @@
+[B]Version 0.1.0[/B] 
+- Added a Tamil section
+- Added a search feature
+- When a movie is playing, the thumbnail is now the movie cover
+
 [B]Version 0.0.2[/B] 
 - Fixed video not playing bug
 - The info screen now shows the name of the movie

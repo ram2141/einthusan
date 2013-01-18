@@ -24,7 +24,7 @@ def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/'
 
-    #addDir('Search', '', 6, '')
+    addDir('Search', '', 6, '')
     
     addDir('Hindi', 'hindi', 7, '')
     addDir('Tamil', 'tamil', 7, '')
@@ -118,14 +118,20 @@ def show_search_box():
 
     search_url = 'http://www.einthusan.com/search/?lang=hindi&search_query=' + search_term
 
-    log(search_url)
+    req = urllib2.Request(search_url)
+    response = urllib2.urlopen(req)
+    link=response.read()
+    response.close()
 
-    match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>')
+    match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(link)
+
+    # Bit of a hack again
+    MOVIES_URL = "http://www.einthusan.com/movies/"
 
     for url,name in match:
-        log(url)
-        log(name)
+        addDir(name, MOVIES_URL + url, 2, '')
 
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
 #Function from xbmc.org forum. This is used to pop-up a virtual keyboard.
@@ -179,10 +185,17 @@ def play_video(url,name):
 
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(link)
 
+    thumbnail_match = re.compile('<img src="(../images.+?)"').findall(link)
+
+    # Bit of a hack again
+    MOVIES_URL = "http://www.einthusan.com/movies/"
+
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
     for stream_link in match:
         listitem = xbmcgui.ListItem(name)
+        if (len(thumbnail_match) > 0):
+            listitem.setThumbnailImage(MOVIES_URL+thumbnail_match[0])
         playlist.add(stream_link, listitem)
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
     player.play(playlist)

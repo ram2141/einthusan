@@ -1,4 +1,4 @@
-# CanadaNepal plugin written by humla.
+# Einthusan.com plugin written by humla.
 
 import re
 import os
@@ -19,17 +19,25 @@ def GetDomain(url):
 
 ##
 # Prints the main categories. Called when id is 0.
-#
-#
 ##
 def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/'
 
     #addDir('Search', '', 6, '')
-    addDir('Recent', '', 3,'')
-    addDir('Top Viewed', '', 4,'')
-    addDir('Top Rated', '', 5,'')
+    
+    addDir('Hindi', 'hindi', 7, '')
+    addDir('Tamil', 'tamil', 7, '')
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+##
+# Shows categories for each language
+##
+def inner_categories(language): 
+    addDir('Recent', language, 3,'')
+    addDir('Top Viewed', language, 4,'')
+    addDir('Top Rated', language, 5,'')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -70,35 +78,35 @@ def INDEX(url):
 #  Just displays the two recent sections. Called when id is 3.
 #
 ##
-def show_recent_sections():
-    addDir('Recently Posted', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Activity&filtered=RecentlyPosted&org_type=Activity&page=1', 1, '')
-    addDir('Recently Viewed', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Activity&filtered=RecentlyViewed&org_type=Activity&page=1', 1, '')
+def show_recent_sections(language):
+    addDir('Recently Posted', 'http://www.einthusan.com/movies/index.php?organize=Activity&filtered=RecentlyPosted&org_type=Activity&page=1&lang='+language, 1, '')
+    addDir('Recently Viewed', 'http://www.einthusan.com/movies/index.php?organize=Activity&filtered=RecentlyViewed&org_type=Activity&page=1&lang='+language, 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
 # Shows the sections for Top Viewed. Called when id is 4.
 #
 ##
-def show_top_viewed_options():
-    addDir('All Time', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Statistics&filtered=AllTimeViews&org_type=Statistics&page=1', 1, '')
-    addDir('This Week', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Statistics&filtered=ThisWeekViews&org_type=Statistics&page=1', 1, '')
-    addDir('Last Week', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Statistics&filtered=LastWeekViews&org_type=Statistics&page=1', 1, '')
-    addDir('This Month', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Statistics&filtered=ThisMonthViews&org_type=Statistics&page=1', 1, '')
-    addDir('Last Month', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Statistics&filtered=LastMonthViews&org_type=Statistics&page=1', 1, '')
-    addDir('This Year', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Statistics&filtered=ThisYearViews&org_type=Statistics&page=1', 1, '')
-    addDir('Last Year', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Statistics&filtered=LastYearViews&org_type=Statistics&page=1', 1, '')
+def show_top_viewed_options(language):
+    addDir('All Time', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=AllTimeViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    addDir('This Week', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=ThisWeekViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    addDir('Last Week', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=LastWeekViews&org_type=Statistics&page=1&lang='+ language, 1, '')
+    addDir('This Month', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=ThisMonthViews&org_type=Statistics&page=1&lang='+ language, 1, '')
+    addDir('Last Month', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=LastMonthViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    addDir('This Year', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=ThisYearViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    addDir('Last Year', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=LastYearViews&org_type=Statistics&page=1&lang=' + language, 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
 # Displays the options for Top Rated. Called when id is 5.
 #
 ##
-def show_top_rated_options():
-    addDir('Romance', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Rating&filtered=Romance&org_type=Rating&page=1', 1, '')
-    addDir('Comedy', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Rating&filtered=Comedy&org_type=Rating&page=1', 1, '')
-    addDir('Action', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Rating&filtered=Action&org_type=Rating&page=1', 1, '')
-    addDir('Storyline', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Rating&filtered=Storyline&org_type=Rating&page=1', 1, '')
-    addDir('Performance', 'http://www.einthusan.com/movies/index.php?lang=hindi&organize=Rating&filtered=Performance&org_type=Rating&page=1', 1, '')
+def show_top_rated_options(language):
+    addDir('Romance', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Romance&org_type=Rating&page=1&lang='+language, 1, '')
+    addDir('Comedy', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Comedy&org_type=Rating&page=1&lang='+language, 1, '')
+    addDir('Action', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Action&org_type=Rating&page=1&lang='+language, 1, '')
+    addDir('Storyline', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Storyline&org_type=Rating&page=1&lang='+language, 1, '')
+    addDir('Performance', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Performance&org_type=Rating&page=1&lang='+language, 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -112,9 +120,15 @@ def show_search_box():
 
     log(search_url)
 
-
     match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>')
 
+    for url,name in match:
+        log(url)
+        log(name)
+
+
+
+#Function from xbmc.org forum. This is used to pop-up a virtual keyboard.
 #########################################################
 # Function  : GUIEditExportName                         #
 #########################################################
@@ -232,12 +246,14 @@ print "Name: " + str(name)
 print "URL: " + str(url)
 
 # Modes
-# 0: The main Categories Menu
+# 0: The main Categories Menu. Selection of language
 # 1: For scraping the movies from a list of movies in the website
 # 2: For playing a video
 # 3: The Recent Section
 # 4: The top viewed list. like above
 # 5: The top rated list. Like above
+# 6: Search options
+# 7: Sub menu
 
 if mode==None: # or url==None or len(url)<1:
         CATEGORIES()
@@ -246,10 +262,16 @@ elif mode==1:
 elif mode==2:
         play_video(url,name)
 elif mode==3:
-        show_recent_sections()
+        ## Here url is used to transport the language
+        show_recent_sections(url)
 elif mode==4:
-        show_top_viewed_options()
+        ## Here url is used to transport the language
+        show_top_viewed_options(url)
 elif mode==5:
-        show_top_rated_options()
+        ## Here url is used to transport the language
+        show_top_rated_options(url)
 elif mode==6:
         show_search_box()
+elif mode==7:
+        ## Here url is used to transport the language
+        inner_categories(url) 

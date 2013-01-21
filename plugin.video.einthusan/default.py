@@ -35,6 +35,7 @@ def CATEGORIES():
 # Shows categories for each language
 ##
 def inner_categories(language): 
+    addDir('A-Z', language, 8, '')
     addDir('Recent', language, 3,'')
     addDir('Top Viewed', language, 4,'')
     addDir('Top Rated', language, 5,'')
@@ -64,13 +65,6 @@ def INDEX(url):
 
     if (len(next_page) == 1):
         addDir("Next >>", url + "&page=" + next_page[0], 1, "http://www.sahara.co.za/Images/next.jpg")
-
-
-#    match = re.compile('<a href=".+?&page=.+?">(.+?)</a>').findall(link)
-#    
-#    for page in match:
-#        log(url + "&page="+page)
-#        addDir("Page " + page, url + "&page="+page , 1 ,"")
 #
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -79,8 +73,11 @@ def INDEX(url):
 #
 ##
 def show_recent_sections(language):
-    addDir('Recently Posted', 'http://www.einthusan.com/movies/index.php?organize=Activity&filtered=RecentlyPosted&org_type=Activity&page=1&lang='+language, 1, '')
-    addDir('Recently Viewed', 'http://www.einthusan.com/movies/index.php?organize=Activity&filtered=RecentlyViewed&org_type=Activity&page=1&lang='+language, 1, '')
+    
+    INDEX_URL = 'http://www.einthusan.com/movies/index.php?'
+
+    addDir('Recently Posted', INDEX_URL + 'organize=Activity&filtered=RecentlyPosted&org_type=Activity&page=1&lang='+language, 1, '')
+    addDir('Recently Viewed', INDEX_URL + 'organize=Activity&filtered=RecentlyViewed&org_type=Activity&page=1&lang='+language, 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -88,13 +85,15 @@ def show_recent_sections(language):
 #
 ##
 def show_top_viewed_options(language):
-    addDir('All Time', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=AllTimeViews&org_type=Statistics&page=1&lang=' + language, 1, '')
-    addDir('This Week', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=ThisWeekViews&org_type=Statistics&page=1&lang=' + language, 1, '')
-    addDir('Last Week', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=LastWeekViews&org_type=Statistics&page=1&lang='+ language, 1, '')
-    addDir('This Month', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=ThisMonthViews&org_type=Statistics&page=1&lang='+ language, 1, '')
-    addDir('Last Month', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=LastMonthViews&org_type=Statistics&page=1&lang=' + language, 1, '')
-    addDir('This Year', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=ThisYearViews&org_type=Statistics&page=1&lang=' + language, 1, '')
-    addDir('Last Year', 'http://www.einthusan.com/movies/index.php?organize=Statistics&filtered=LastYearViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    INDEX_URL = 'http://www.einthusan.com/movies/index.php?'
+
+    addDir('All Time', INDEX_URL + 'organize=Statistics&filtered=AllTimeViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    addDir('This Week', INDEX_URL + 'organize=Statistics&filtered=ThisWeekViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    addDir('Last Week', INDEX_URL + 'organize=Statistics&filtered=LastWeekViews&org_type=Statistics&page=1&lang='+ language, 1, '')
+    addDir('This Month', INDEX_URL + 'organize=Statistics&filtered=ThisMonthViews&org_type=Statistics&page=1&lang='+ language, 1, '')
+    addDir('Last Month', INDEX_URL + 'organize=Statistics&filtered=LastMonthViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    addDir('This Year', INDEX_URL + 'organize=Statistics&filtered=ThisYearViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    addDir('Last Year', INDEX_URL + 'organize=Statistics&filtered=LastYearViews&org_type=Statistics&page=1&lang=' + language, 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -102,16 +101,39 @@ def show_top_viewed_options(language):
 #
 ##
 def show_top_rated_options(language):
-    addDir('Romance', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Romance&org_type=Rating&page=1&lang='+language, 1, '')
-    addDir('Comedy', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Comedy&org_type=Rating&page=1&lang='+language, 1, '')
-    addDir('Action', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Action&org_type=Rating&page=1&lang='+language, 1, '')
-    addDir('Storyline', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Storyline&org_type=Rating&page=1&lang='+language, 1, '')
-    addDir('Performance', 'http://www.einthusan.com/movies/index.php?organize=Rating&filtered=Performance&org_type=Rating&page=1&lang='+language, 1, '')
+    INDEX_URL = 'http://www.einthusan.com/movies/index.php?'
+
+    addDir('Romance', INDEX_URL + 'organize=Rating&filtered=Romance&org_type=Rating&page=1&lang='+language, 1, '')
+    addDir('Comedy', INDEX_URL + 'organize=Rating&filtered=Comedy&org_type=Rating&page=1&lang='+language, 1, '')
+    addDir('Action', INDEX_URL + 'organize=Rating&filtered=Action&org_type=Rating&page=1&lang='+language, 1, '')
+    addDir('Storyline', INDEX_URL + 'organize=Rating&filtered=Storyline&org_type=Rating&page=1&lang='+language, 1, '')
+    addDir('Performance', INDEX_URL + 'organize=Rating&filtered=Performance&org_type=Rating&page=1&lang='+language, 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+
+##
+# Displays the options for A-Z view. Called when id is 8.
+##
+def show_A_Z(language):
+    azlist = map (chr, range(65,91))
+
+    INDEX_URL = 'http://www.einthusan.com/movies/index.php?'
+
+    addDir('Numerical', INDEX_URL + 'organize=Alphabetical&filtered=Numerical&org_type=Alphabetical&lang=' + language, 1, '')
+
+    for letter in azlist:
+        addDir(letter, INDEX_URL + 'organize=Alphabetical&org_type=Alphabetical&filtered=' + letter + '&lang=' + language, 1, '')
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+    
+##
+# Displays the options for yearly view. Called when id is 9.
+##
+def show_yearly_view(language):
+
 
 ##
 # Shows the search box for serching. Shown when the id is 6.
-#
 ##
 def show_search_box():
     search_term = GUIEditExportName("")
@@ -267,6 +289,8 @@ print "URL: " + str(url)
 # 5: The top rated list. Like above
 # 6: Search options
 # 7: Sub menu
+# 8: A-Z view.
+# 9: Yearly view
 
 if mode==None: # or url==None or len(url)<1:
         CATEGORIES()
@@ -288,3 +312,6 @@ elif mode==6:
 elif mode==7:
         ## Here url is used to transport the language
         inner_categories(url) 
+elif mode==8:
+        ## Here url is used to transport the lanuage
+        show_A_Z(url)

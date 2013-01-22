@@ -128,9 +128,10 @@ def show_A_Z(language):
     
 ##
 # Displays the options for yearly view. Called when id is 9.
+# To be implemented
 ##
 def show_yearly_view(language):
-
+    a = 1
 
 ##
 # Shows the search box for serching. Shown when the id is 6.

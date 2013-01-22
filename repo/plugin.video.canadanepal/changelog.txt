@@ -1,0 +1,51 @@
+[B]Version 0.3.2[/B]
+- Clean HTML tags from names properly
+- Some new thumbnails, clear texture db to reload
+
+[B]Version 0.3.1[/B]
+- Fixed bugs causing script error on Homepage and Sports news
+
+[B]Version 0.3.0[/B]
+- Added a "Home Page" main category 
+- Improved Youtube link scraping
+
+[B]Version 0.2.5[/B]
+- Added a Play All item for videos with multiple links
+- Improved blip.tv scraping
+- Fixed a bug with the Daily News section
+
+[B]Version 0.2.2[/B]
+- Added a new main section for sports news 
+
+[B]Version 0.2.1[/B]
+- Fixed the bug with blip.tv link that was created by previous version
+
+[B]Version 0.2.0[/B]
+- Added Today's news
+- Some minor scraping improvements
+
+[B]Version 0.1.8[/B]
+- Added Daily News section
+
+[B]Version 0.1.5[/B]
+- Removed os.getcwd() calls and replaced them with getAddonInfo('path')
+
+[B]Version 0.1.3[/B]
+- Added ABC TV but is slow and buffers a lot
+- Added more images to make the addon look better
+
+[B]Version 0.1.2[/B]
+- Added NTV Plus and some more images in TV Series
+
+[B]Version 0.1.0[/B]
+- Removed urllib request's header. No problems without them
+- Added a new category for Live TV(only few available now)
+- NTV has a problem in that it freezes after some time
+- Included images in the local disks instead of getting it from the internet
+
+[B]Version 0.0.5[/B]
+- Improved link scraping for Youtube and Blip.tv
+- Added a new Live FM section although half of them only work
+
+[B]Version 0.0.1[/B]
+- Initial version of canadanepal plugin

@@ -11,7 +11,7 @@ for plugin in `ls -d */`
 do
     if [ -f $plugin/addon.xml ]
         then
-            echo "Going into " $plugin
+            echo "Adding " $plugin
             tail --lines=+2  $plugin/addon.xml >> $addons_file
     fi
 done
@@ -19,3 +19,4 @@ echo "</addons>" >> $addons_file
 
 echo "Generating checksum file in " $md5_file
 md5sum $addons_file > $md5_file
+echo "Successfully completed operation "

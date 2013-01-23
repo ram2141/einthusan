@@ -7,16 +7,6 @@ import urllib,urllib2
 import xbmcplugin,xbmcgui
 import xbmcaddon
 
-# Taken from desitvforum xbmc plugin.
-def GetDomain(url):
-    print url
-    tmp = re.compile('//(.+?)/').findall(url)
-    domain = 'Unknown'
-    if len(tmp) > 0:
-        domain = tmp[0].replace('www.', '')
-    return domain
-
-
 ##
 # Prints the main categories. Called when id is 0.
 ##
@@ -36,6 +26,8 @@ def CATEGORIES():
 ##
 def inner_categories(language): 
     addDir('A-Z', language, 8, '')
+    #addDir('Years', language, 9, '')
+    #addDir('Actors', language, 10,'')
     addDir('Recent', language, 3,'')
     addDir('Top Viewed', language, 4,'')
     addDir('Top Rated', language, 5,'')
@@ -131,6 +123,12 @@ def show_A_Z(language):
 # To be implemented
 ##
 def show_yearly_view(language):
+    a = 1
+
+##
+# Shows the list of actors. Shown when id is 10.
+##
+def show_actors_view(language):
     a = 1
 
 ##
@@ -292,27 +290,34 @@ print "URL: " + str(url)
 # 7: Sub menu
 # 8: A-Z view.
 # 9: Yearly view
+# 10: Actor view
 
 if mode==None: # or url==None or len(url)<1:
-        CATEGORIES()
+    CATEGORIES()
 elif mode==1:
-        INDEX(url)
+    INDEX(url)
 elif mode==2:
-        play_video(url,name)
+    play_video(url,name)
 elif mode==3:
-        ## Here url is used to transport the language
-        show_recent_sections(url)
+    ## Here url is used to transport the language
+    show_recent_sections(url)
 elif mode==4:
-        ## Here url is used to transport the language
-        show_top_viewed_options(url)
+    ## Here url is used to transport the language
+    show_top_viewed_options(url)
 elif mode==5:
-        ## Here url is used to transport the language
-        show_top_rated_options(url)
+    ## Here url is used to transport the language
+    show_top_rated_options(url)
 elif mode==6:
-        show_search_box()
+    show_search_box()
 elif mode==7:
-        ## Here url is used to transport the language
-        inner_categories(url) 
+    ## Here url is used to transport the language
+    inner_categories(url) 
 elif mode==8:
-        ## Here url is used to transport the lanuage
-        show_A_Z(url)
+    ## Here url is used to transport the lanuage
+    show_A_Z(url)
+elif mode==9:
+    ## Here url is used to transport language
+    show_yearly_view(url)
+elif mode==10:
+    ## Here url is used to transport lanaguage
+    show_actors_view(url)

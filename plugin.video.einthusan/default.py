@@ -6,6 +6,7 @@ import urlresolver
 import urllib,urllib2
 import xbmcplugin,xbmcgui
 import xbmcaddon
+from t0mm0.common.net import Net
 
 ##
 # Prints the main categories. Called when id is 0.
@@ -15,7 +16,6 @@ def CATEGORIES():
     img_path = cwd + '/images/'
 
     addDir('Search', '', 6, '')
-    
     addDir('Hindi', 'hindi', 7, '')
     addDir('Tamil', 'tamil', 7, '')
 
@@ -26,8 +26,8 @@ def CATEGORIES():
 ##
 def inner_categories(language): 
     addDir('A-Z', language, 8, '')
-    #addDir('Years', language, 9, '')
-    #addDir('Actors', language, 10,'')
+    addDir('Years', language, 9, '')
+    addDir('Actors', language, 10,'')
     addDir('Recent', language, 3,'')
     addDir('Top Viewed', language, 4,'')
     addDir('Top Rated', language, 5,'')
@@ -40,24 +40,19 @@ def inner_categories(language):
 ##
 def INDEX(url):
     print "Getting video links"
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
+    html = Net().http_GET(url).content
+
+    match = re.compile('<a class="movie-cover-wrapper" href="(.+?)"><img src="(.+?)" alt="(.+?)"').findall(html)
 
     # Bit of a hack
     MOVIES_URL = "http://www.einthusan.com/movies/"
-
-    match = re.compile('<a class="movie-cover-wrapper" href="(.+?)"><img src="(.+?)" alt="(.+?)"').findall(link)
-
     for page_link,image,name in match:
         addDir(name, MOVIES_URL + page_link, 2, MOVIES_URL + image)
 
-    next_page = re.compile('<a class="numerical-nav-selected" href=".+?">.+?</a><a href=".+?">(.+?)</a>').findall(link)
-
+    next_page = re.compile('<a class="numerical-nav-selected" href=".+?">.+?</a><a href=".+?">(.+?)</a>').findall(html)
     if (len(next_page) == 1):
         addDir("Next >>", url + "&page=" + next_page[0], 1, "http://www.sahara.co.za/Images/next.jpg")
-#
+
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -66,10 +61,10 @@ def INDEX(url):
 ##
 def show_recent_sections(language):
     
-    INDEX_URL = 'http://www.einthusan.com/movies/index.php?'
+    INDEX_URL = 'http://www.einthusan.com/movies/index.php?organize=Activity&org_type=Activity&page=1&lang='+language
 
-    addDir('Recently Posted', INDEX_URL + 'organize=Activity&filtered=RecentlyPosted&org_type=Activity&page=1&lang='+language, 1, '')
-    addDir('Recently Viewed', INDEX_URL + 'organize=Activity&filtered=RecentlyViewed&org_type=Activity&page=1&lang='+language, 1, '')
+    addDir('Recently Posted', INDEX_URL + '&filtered=RecentlyPosted=', 1, '')
+    addDir('Recently Viewed', INDEX_URL + '&filtered=RecentlyViewed', 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -77,15 +72,15 @@ def show_recent_sections(language):
 #
 ##
 def show_top_viewed_options(language):
-    INDEX_URL = 'http://www.einthusan.com/movies/index.php?'
+    INDEX_URL = 'http://www.einthusan.com/movies/index.php?organize=Statistics&org_type=Statistics&page=1&lang='+language
 
-    addDir('All Time', INDEX_URL + 'organize=Statistics&filtered=AllTimeViews&org_type=Statistics&page=1&lang=' + language, 1, '')
-    addDir('This Week', INDEX_URL + 'organize=Statistics&filtered=ThisWeekViews&org_type=Statistics&page=1&lang=' + language, 1, '')
-    addDir('Last Week', INDEX_URL + 'organize=Statistics&filtered=LastWeekViews&org_type=Statistics&page=1&lang='+ language, 1, '')
-    addDir('This Month', INDEX_URL + 'organize=Statistics&filtered=ThisMonthViews&org_type=Statistics&page=1&lang='+ language, 1, '')
-    addDir('Last Month', INDEX_URL + 'organize=Statistics&filtered=LastMonthViews&org_type=Statistics&page=1&lang=' + language, 1, '')
-    addDir('This Year', INDEX_URL + 'organize=Statistics&filtered=ThisYearViews&org_type=Statistics&page=1&lang=' + language, 1, '')
-    addDir('Last Year', INDEX_URL + 'organize=Statistics&filtered=LastYearViews&org_type=Statistics&page=1&lang=' + language, 1, '')
+    addDir('All Time', INDEX_URL + '&filtered=AllTimeViews' , 1, '')
+    addDir('This Week', INDEX_URL + '&filtered=ThisWeekViews', 1, '')
+    addDir('Last Week', INDEX_URL + '&filtered=LastWeekViews', 1, '')
+    addDir('This Month', INDEX_URL + '&filtered=ThisMonthViews', 1, '')
+    addDir('Last Month', INDEX_URL + '&filtered=LastMonthViews' , 1, '')
+    addDir('This Year', INDEX_URL + '&filtered=ThisYearViews' , 1, '')
+    addDir('Last Year', INDEX_URL + '&filtered=LastYearViews' , 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -93,13 +88,13 @@ def show_top_viewed_options(language):
 #
 ##
 def show_top_rated_options(language):
-    INDEX_URL = 'http://www.einthusan.com/movies/index.php?'
+    INDEX_URL = 'http://einthusan.com/movies/index.php?organize=Rating&org_type=Rating&page=1&lang=' + language
 
-    addDir('Romance', INDEX_URL + 'organize=Rating&filtered=Romance&org_type=Rating&page=1&lang='+language, 1, '')
-    addDir('Comedy', INDEX_URL + 'organize=Rating&filtered=Comedy&org_type=Rating&page=1&lang='+language, 1, '')
-    addDir('Action', INDEX_URL + 'organize=Rating&filtered=Action&org_type=Rating&page=1&lang='+language, 1, '')
-    addDir('Storyline', INDEX_URL + 'organize=Rating&filtered=Storyline&org_type=Rating&page=1&lang='+language, 1, '')
-    addDir('Performance', INDEX_URL + 'organize=Rating&filtered=Performance&org_type=Rating&page=1&lang='+language, 1, '')
+    addDir('Romance', INDEX_URL + '&filtered=Romance', 1, '')
+    addDir('Comedy', INDEX_URL + '&filtered=Comedy', 1, '')
+    addDir('Action', INDEX_URL + '&filtered=Action', 1, '')
+    addDir('Storyline', INDEX_URL + '&filtered=Storyline', 1, '')
+    addDir('Performance', INDEX_URL + '&filtered=Performance', 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 
@@ -109,21 +104,33 @@ def show_top_rated_options(language):
 def show_A_Z(language):
     azlist = map (chr, range(65,91))
 
-    INDEX_URL = 'http://www.einthusan.com/movies/index.php?'
+    INDEX_URL = 'http://www.einthusan.com/movies/index.php?organize=Alphabetical&org_type=Alphabetical&lang='+language
 
-    addDir('Numerical', INDEX_URL + 'organize=Alphabetical&filtered=Numerical&org_type=Alphabetical&lang=' + language, 1, '')
+    addDir('Numerical', INDEX_URL + '&filtered=Numerical', 1, '')
 
     for letter in azlist:
-        addDir(letter, INDEX_URL + 'organize=Alphabetical&org_type=Alphabetical&filtered=' + letter + '&lang=' + language, 1, '')
+        addDir(letter, INDEX_URL + '&filtered=' + letter, 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     
 ##
 # Displays the options for yearly view. Called when id is 9.
-# To be implemented
 ##
 def show_yearly_view(language):
-    a = 1
+    url = 'http://einthusan.com/movies/index.php?lang=hindi&organize=Year'
+    BASE_URL = 'http://einthusan.com/movies/index.php'
+    
+    html = Net().http_GET(url).content
+
+    list_div = re.compile('<div class="video-organizer-element-wrapper">(.+?)</div>').findall(html)
+
+    if len(list_div) > 0:
+        years = re.compile('<a href="(.+?)">(.+?)</a>').findall(list_div[0])
+
+        for year_url,year in years:
+            addDir(year, BASE_URL + year_url, 1, '')
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
 # Shows the list of actors. Shown when id is 10.
@@ -131,6 +138,12 @@ def show_yearly_view(language):
 def show_actors_view(language):
     a = 1
 
+
+##
+#
+##
+def show_directors_view(language):
+    a = 1
 ##
 # Shows the search box for serching. Shown when the id is 6.
 ##
@@ -139,12 +152,8 @@ def show_search_box():
 
     search_url = 'http://www.einthusan.com/search/?lang=hindi&search_query=' + search_term
 
-    req = urllib2.Request(search_url)
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
-
-    match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(link)
+    html = Net().http_GET(url).content
+    match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(html)
 
     # Bit of a hack again
     MOVIES_URL = "http://www.einthusan.com/movies/"
@@ -199,14 +208,11 @@ def play_video(url,name):
     log("Playing " + name)
     log("Playing " + url)
     
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
+    html = Net().http_GET(url).content
 
-    match = re.compile("'hd-2': { 'file': '(.+?)'").findall(link)
+    match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
 
-    thumbnail_match = re.compile('<img src="(../images.+?)"').findall(link)
+    thumbnail_match = re.compile('<img src="(../images.+?)"').findall(html)
 
     # Bit of a hack again
     MOVIES_URL = "http://www.einthusan.com/movies/"

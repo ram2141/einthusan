@@ -27,7 +27,8 @@ def CATEGORIES():
 def inner_categories(language): 
     addDir('A-Z', language, 8, '')
     addDir('Years', language, 9, '')
-    addDir('Actors', language, 10,'')
+    #addDir('Actors', language, 10,'')
+    #addDir('Director', language, 11,'')
     addDir('Recent', language, 3,'')
     addDir('Top Viewed', language, 4,'')
     addDir('Top Rated', language, 5,'')
@@ -117,7 +118,7 @@ def show_A_Z(language):
 # Displays the options for yearly view. Called when id is 9.
 ##
 def show_yearly_view(language):
-    url = 'http://einthusan.com/movies/index.php?lang=hindi&organize=Year'
+    url = 'http://einthusan.com/movies/index.php?organize=Year&lang='+language
     BASE_URL = 'http://einthusan.com/movies/index.php'
     
     html = Net().http_GET(url).content
@@ -140,10 +141,12 @@ def show_actors_view(language):
 
 
 ##
-#
+# Shows the list of directors. Shows when id is 11.
 ##
 def show_directors_view(language):
     a = 1
+
+
 ##
 # Shows the search box for serching. Shown when the id is 6.
 ##
@@ -297,6 +300,7 @@ print "URL: " + str(url)
 # 8: A-Z view.
 # 9: Yearly view
 # 10: Actor view
+# 11: Director view
 
 if mode==None: # or url==None or len(url)<1:
     CATEGORIES()
@@ -327,3 +331,6 @@ elif mode==9:
 elif mode==10:
     ## Here url is used to transport lanaguage
     show_actors_view(url)
+elif mode==11:
+    ## Here url is used to transport lanaguage
+    show_directors_view(url) 

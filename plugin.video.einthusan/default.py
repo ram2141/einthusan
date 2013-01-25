@@ -27,8 +27,8 @@ def CATEGORIES():
 def inner_categories(language): 
     addDir('A-Z', language, 8, '')
     addDir('Years', language, 9, '')
-    #addDir('Actors', language, 10,'')
-    #addDir('Director', language, 11,'')
+    addDir('Actors', language, 10,'')
+    addDir('Director', language, 11,'')
     addDir('Recent', language, 3,'')
     addDir('Top Viewed', language, 4,'')
     addDir('Top Rated', language, 5,'')
@@ -115,10 +115,21 @@ def show_A_Z(language):
 
     
 ##
-# Displays the options for yearly view. Called when id is 9.
-##
-def show_yearly_view(language):
-    url = 'http://einthusan.com/movies/index.php?organize=Year&lang='+language
+# Single method that shows the list of years, actors and directors. 
+# Called when id is 9, 10, 11
+# 9 : List of Years
+# 10: List of Actors
+# 11: List of directors
+## 
+def show_list(language, mode):
+
+    url = 'http://www.einthusan.com/movies/index.php?organize=Director'
+    if (mode == 9):
+        url = 'http://einthusan.com/movies/index.php?organize=Year'
+    elif (mode == 10):
+        url = 'http://www.einthusan.com/movies/index.php?organize=Cast'
+    url = url + "&lang="+language
+
     BASE_URL = 'http://einthusan.com/movies/index.php'
     
     html = Net().http_GET(url).content
@@ -132,20 +143,6 @@ def show_yearly_view(language):
             addDir(year, BASE_URL + year_url, 1, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
-
-##
-# Shows the list of actors. Shown when id is 10.
-##
-def show_actors_view(language):
-    a = 1
-
-
-##
-# Shows the list of directors. Shows when id is 11.
-##
-def show_directors_view(language):
-    a = 1
-
 
 ##
 # Shows the search box for serching. Shown when the id is 6.
@@ -325,12 +322,6 @@ elif mode==7:
 elif mode==8:
     ## Here url is used to transport the lanuage
     show_A_Z(url)
-elif mode==9:
+elif mode in [9,10,11]:
     ## Here url is used to transport language
-    show_yearly_view(url)
-elif mode==10:
-    ## Here url is used to transport lanaguage
-    show_actors_view(url)
-elif mode==11:
-    ## Here url is used to transport lanaguage
-    show_directors_view(url) 
+    show_list(url, mode)

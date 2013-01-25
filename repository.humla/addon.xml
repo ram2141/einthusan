@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.humla" name="humla Add-on Repository" version="1.0.3" provider-name="humla">
+	<extension point="xbmc.addon.repository" name="humla Add-on Repository">
+		<info compressed="false">https://raw.github.com/humla/canadanepal-xbmc/master/humla_repo/addons.xml</info>
+		<checksum>https://raw.github.com/humla/canadanepal-xbmc/master/humla_repo/addons.xml.md5</checksum>
+		<datadir zip="true">https://raw.github.com/humla/canadanepal-xbmc/master/repo/</datadir>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary>Install Add-ons from humla Add-on Repository</summary>
+		<description>Video plug-ins for XBMC by humla!</description>
+		<disclaimer></disclaimer>
+		<platform>all</platform>
+	</extension>
+</addon>

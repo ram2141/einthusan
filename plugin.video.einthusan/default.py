@@ -36,8 +36,7 @@ def inner_categories(language):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
-#  Scrapes a list of movies from the website. Called when id is 1.
-#
+#  Scrapes a list of movies from the website. Called when mode is 1.
 ##
 def INDEX(url):
     print "Getting video links"
@@ -50,9 +49,13 @@ def INDEX(url):
     for page_link,image,name in match:
         addDir(name, MOVIES_URL + page_link, 2, MOVIES_URL + image)
 
-    next_page = re.compile('<a class="numerical-nav-selected" href=".+?">.+?</a><a href=".+?">(.+?)</a>').findall(html)
-    if (len(next_page) == 1):
-        addDir("Next >>", url + "&page=" + next_page[0], 1, "http://www.sahara.co.za/Images/next.jpg")
+
+    numerical_nav = re.compile('<div class="numerical-nav">(.+?)</div>').findall(html)
+
+    if (len(numerical_nav) > 0):
+        next_page = re.compile('<a class="numerical-nav-selected" href=".+?">.+?</a><a href=".+?">(.+?)</a>').findall(numerical_nav[0])
+        if (len(next_page) == 1):
+            addDir("Next >>", url + "&page=" + next_page[0], 1, "http://www.sahara.co.za/Images/next.jpg")
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 

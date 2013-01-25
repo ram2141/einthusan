@@ -1,3 +1,7 @@
+[B]Version 0.2.6[/B] 
+- Addon setting added, but currently it does nothing
+- Bug fix
+
 [B]Version 0.2.5[/B] 
 - Added an actors and directors view section
 - Also fixed the pagination issue when displaying a list of movies

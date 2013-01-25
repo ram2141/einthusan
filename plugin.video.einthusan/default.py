@@ -1,10 +1,10 @@
 # Einthusan.com plugin written by humla.
 
 import re
-import os
 import urlresolver
 import urllib,urllib2
-import xbmcplugin,xbmcgui
+import xbmcplugin
+import xbmcgui
 import xbmcaddon
 from t0mm0.common.net import Net
 
@@ -18,6 +18,7 @@ def CATEGORIES():
     addDir('Search', '', 6, '')
     addDir('Hindi', 'hindi', 7, '')
     addDir('Tamil', 'tamil', 7, '')
+    addDir('Addon Settings', '', 12, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -67,7 +68,7 @@ def show_recent_sections(language):
     
     INDEX_URL = 'http://www.einthusan.com/movies/index.php?organize=Activity&org_type=Activity&page=1&lang='+language
 
-    addDir('Recently Posted', INDEX_URL + '&filtered=RecentlyPosted=', 1, '')
+    addDir('Recently Posted', INDEX_URL + '&filtered=RecentlyPosted', 1, '')
     addDir('Recently Viewed', INDEX_URL + '&filtered=RecentlyViewed', 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -230,6 +231,12 @@ def play_video(url,name):
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
     player.play(playlist)
 
+##
+# Displays the setting view. Called when mode is 12
+##
+def display_setting():
+    xbmcaddon.Addon(id='plugin.video.einthusan').openSettings()
+
 def get_params():
     param=[]
     paramstring=sys.argv[2]
@@ -301,6 +308,7 @@ print "URL: " + str(url)
 # 9: Yearly view
 # 10: Actor view
 # 11: Director view
+# 12: Show Addon Settings
 
 if mode==None: # or url==None or len(url)<1:
     CATEGORIES()
@@ -328,3 +336,5 @@ elif mode==8:
 elif mode in [9,10,11]:
     ## Here url is used to transport language
     show_list(url, mode)
+elif mode==12:
+    display_setting();

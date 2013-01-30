@@ -6,6 +6,7 @@ import urlresolver
 import urllib,urllib2
 import xbmcplugin,xbmcgui
 import xbmcaddon
+from t0mm0.common.net import Net
 
 # Taken from desitvforum xbmc plugin.
 def GetDomain(url):
@@ -28,62 +29,47 @@ def CATEGORIES():
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def get_sports(url, name):
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(url)
-    link = response.read()
-    response.close()
-    name = re.compile("(Score.+?)<").findall(link)
-    address = get_dailymotion_link(link)
-    print address[0]
-    print name[0]
+    html = Net().http_GET(url).content
+    name = re.compile("(Score.+?)<").findall(html)
+    address = get_dailymotion_link(html)
     addDir(name[0], address[0],3,"")
     get_previous(url,name,"http://canadanepal.info/sports/update.php")
 
 def get_previous(m_url, name, url):
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req)
-    link = response.read()
-    response.close()
-    match = re.compile('<a href="(.+?)" .+?>.+?>(.+?)<') .findall(link)
+    html = Net().http_GET(url).content
+
+    match = re.compile('<a href="(.+?)" .+?>.+?>(.+?)<') .findall(html)
     for u,name in match:
         addDir(name, m_url+u, 2 ,"")
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
     
 def get_news(url, name):
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req)
-    link = response.read()
-    response.read()
-    name=re.compile('Today\'s(.+?)<').findall(link)
-    address = get_youtube_link(link)
-    print name[0], address[0]
-    addDir(name[0],address[0],3,"")
+    html = Net().http_GET(url).content
+    name=re.compile('Today\'s(.+?)<').findall(html)
+    address = get_youtube_link(html)
+    if (len(name) > 0):
+        print name[0], address[0]
+        addDir(name[0],address[0],3,"")
     get_previous(url, name, 'http://canadanepal.info/dailynews/update.php')
 
 def SHOWRADIO(url):
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
-    match=re.compile('<li><a href="(.+?)"  class="normal"  target="_self" ><span>(.+?)</span>').findall(link)
+    html = Net().http_GET(url).content
+    match=re.compile('<li><a href="(.+?)"  class="normal"  target="_self" ><span>(.+?)</span>').findall(html)
     for fm_url,name in match:
             addDir(name,url + fm_url,5,"")
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 # Scans the page to find streaming url for live radio.
-def get_radio_links(link):
-    match=re.compile('(.+?)file=(.+?)&amp').findall(link)
+def get_radio_links(html):
+    match=re.compile('(.+?)file=(.+?)&amp').findall(html)
     if (len(match) == 0):
-        match=re.compile('(.+?)stream1=(.+?)&amp;').findall(link)
+        match=re.compile('(.+?)stream1=(.+?)&amp;').findall(html)
     return [b for a,b in match]
 
 # Scans the main FM page looking for stations that are available
 def AUDIOLINKS(url, name):
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
-    match = get_radio_links(link)
+    html = Net().http_GET(url).content
+    match = get_radio_links(html)
     if (len(match) > 0):
         xbmc.Player().play(match[0], "")
     return 
@@ -99,17 +85,14 @@ def clear_htmltags(name):
 
 # Lists the new episodes of TV series
 def INDEX(url):
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
-    match=re.compile('<div><font size="2">(.+?)<a href="(.+?)".+?Click').findall(link)
+    html = Net().http_GET(url).content
+    match=re.compile('<div><font size="2">(.+?)<a href="(.+?)".+?Click').findall(html)
     image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     for name,url in match:
         name = clear_htmltags(name)
         image_name = name[:4]
         image_url = image_base_url + image_name + '.jpg'
-        print image_url
+        #print image_url
         addDir(name,url,2,image_url)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -127,42 +110,39 @@ def SHOWLIVETVLIST(url):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
     return
 
-def get_dailymotion_link(link):
+def get_dailymotion_link(html):
     print "Scraping Dailymotion link"
-    match=re.compile('"(http://www.dailymotion.com/video/.+?)"').findall(link)
+    match=re.compile('"(http://www.dailymotion.com/video/.+?)"').findall(html)
     if (len(match) == 0):
         print "Dailymotion doing alternate scraping"
-        match=re.compile('<iframe src="(.+?)"').findall(link)
+        match=re.compile('<iframe src="(.+?)"').findall(html)
     length = len(match)
     while length > 0:
         match[length-1] = match[length-1].replace('/embed','')
         length = length - 1
     return match
 
-def get_youtube_link(link):
+def get_youtube_link(html):
     print "Scraping youtube link"
-    match=re.compile('"http://www.youtube.com/v/(.+?)"').findall(link)
+    match=re.compile('"http://www.youtube.com/v/(.+?)"').findall(html)
     if (len(match) == 0):
-        match = re.compile('"http://www.youtube.com/embed/(.+?)"').findall(link)
+        match = re.compile('"http://www.youtube.com/embed/(.+?)"').findall(html)
     match = set(match)  
     return ["http://www.youtube.com/watch?v="+a for a in match]
 
-def get_blip_tv_link(link):
+def get_blip_tv_link(html):
     print "Scraping blip tv link"
-    match=re.compile('"(http://(www.)?blip.tv/play/.+?)"').findall(link)
+    match=re.compile('"(http://(www.)?blip.tv/play/.+?)"').findall(html)
     return [a for a,b in match]
     
 def VIDEOLINKS(url,name):
     print "Getting video links"
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
-    match = get_youtube_link(link)
+    html = Net().http_GET(url).content
+    match = get_youtube_link(html)
     if (len(match) == 0):
-        match = get_blip_tv_link(link)
+        match = get_blip_tv_link(html)
     if (len(match) == 0):
-        match = get_dailymotion_link(link)
+        match = get_dailymotion_link(html)
     i = 1
     length = len(match)
     image_path = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
@@ -202,11 +182,8 @@ def get_stream_url(url):
     return stream_url
     
 def get_homePageStuff(url):
-    req = urllib2.Request(url)
-    response = urllib2.urlopen(req)
-    link=response.read()
-    response.close()
-    data = re.compile('<div id="bodyimg">((.|\n)+?)<!-- Fm Programs -->((.|\n)+?)<div id="Interview With Raju Lama">((.|\n)+?)<div id="Calender">').findall(link)
+    html = Net().http_GET(url).content
+    data = re.compile('<div id="bodyimg">((.|\n)+?)<!-- Fm Programs -->((.|\n)+?)<div id="Interview With Raju Lama">((.|\n)+?)<div id="Calender">').findall(html)
     get_homePageStuffHelper(data[0][0])
     get_homePageStuffHelper(data[0][4])
     xbmcplugin.endOfDirectory(int(sys.argv[1]))

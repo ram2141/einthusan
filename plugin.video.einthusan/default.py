@@ -15,7 +15,6 @@ def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/'
 
-    addDir('Search', '', 6, '')
     addDir('Hindi', 'hindi', 7, '')
     addDir('Tamil', 'tamil', 7, '')
     addDir('Addon Settings', '', 12, '')
@@ -33,6 +32,7 @@ def inner_categories(language):
     addDir('Recent', language, 3,'')
     addDir('Top Viewed', language, 4,'')
     addDir('Top Rated', language, 5,'')
+    addDir('Search', language, 6, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -151,12 +151,12 @@ def show_list(language, mode):
 ##
 # Shows the search box for serching. Shown when the id is 6.
 ##
-def show_search_box():
+def show_search_box(language):
     search_term = GUIEditExportName("")
 
-    search_url = 'http://www.einthusan.com/search/?lang=hindi&search_query=' + search_term
+    search_url = 'http://www.einthusan.com/search/?search_query=' + search_term + "&lang=" + language
 
-    html = Net().http_GET(url).content
+    html = Net().http_GET(search_url).content
     match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(html)
 
     # Bit of a hack again
@@ -326,7 +326,8 @@ elif mode==5:
     ## Here url is used to transport the language
     show_top_rated_options(url)
 elif mode==6:
-    show_search_box()
+    ## Here url is used to transport the language
+    show_search_box(url)
 elif mode==7:
     ## Here url is used to transport the language
     inner_categories(url) 

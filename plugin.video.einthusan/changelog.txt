@@ -1,3 +1,6 @@
+[B]Version 0.2.7[/B] 
+- Searching is possible after language selection (Was a bug before)
+
 [B]Version 0.2.6[/B] 
 - Addon setting added, but currently it does nothing
 - Bug fix

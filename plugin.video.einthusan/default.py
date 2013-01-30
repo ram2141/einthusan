@@ -17,6 +17,7 @@ def CATEGORIES():
 
     addDir('Hindi', 'hindi', 7, '')
     addDir('Tamil', 'tamil', 7, '')
+    #addDir('ChandraMukhi Tamil Movie (Bluray Preview)', 'http://www.einthusan.com/movies/watch.php?id=56&bluray=true', 2, '')
     addDir('Addon Settings', '', 12, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -215,6 +216,9 @@ def play_video(url,name):
     html = Net().http_GET(url).content
 
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
+
+    if (len(match) == 0):
+        match = re.compile("'file': '(.+?)'").findall(html)
 
     thumbnail_match = re.compile('<img src="(../images.+?)"').findall(html)
 

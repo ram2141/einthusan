@@ -1,3 +1,17 @@
+[B]Version 0.2.7[/B] 
+- Searching is possible after language selection (Was a bug before)
+
+[B]Version 0.2.6[/B] 
+- Addon setting added, but currently it does nothing
+- Bug fix
+
+[B]Version 0.2.5[/B] 
+- Added an actors and directors view section
+- Also fixed the pagination issue when displaying a list of movies
+
+[B]Version 0.2.0[/B] 
+- Added a yearly view section
+
 [B]Version 0.1.5[/B] 
 - Added A-Z sections
 

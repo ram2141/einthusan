@@ -17,6 +17,44 @@ def GetDomain(url):
         domain = tmp[0].replace('www.', '')
     return domain
 
+##
+# Google Analytics. By Mikey1234
+##
+def GA():
+    from random import randint
+    from urllib import urlencode
+    from urllib2 import urlopen
+    from urlparse import urlunparse
+    from hashlib import sha1
+    from os import environ
+    PROPERTY_ID = environ.get("GA_PROPERTY_ID", "UA-38304761")
+
+    # Generate the visitor identifier somehow. I get it from the
+    # environment, calculate the SHA1 sum of it, convert this from base 16
+    # to base 10 and get first 10 digits of this number.
+    VISITOR = environ.get("GA_VISITOR", "xxxxx")
+    VISITOR = str(int("0x%s" % sha1(VISITOR).hexdigest(), 0))[:10]
+
+    # The path to visit
+    PATH = "xbmc_canadanepal"
+
+    # Collect everything in a dictionary
+    DATA = {"utmwv": "4.2.8-FRODO",
+            "utmn": str(randint(1, 9999999999)),
+            "utmp": PATH,
+            "utmac": PROPERTY_ID,
+            "utmcc": "__utma=%s;" % ".".join(["1", VISITOR, "1", "1", "1", "1"])}
+
+    # Encode this data and generate the final URL
+    URL = urlunparse(("http",
+                      "www.google-analytics.com",
+                      "/__utm.gif",
+                      "",
+                      urlencode(DATA),
+                      ""))
+    urlopen(URL).info()
+    log("Executing GA (**************************************************************************")
+
 def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/'
@@ -89,7 +127,7 @@ def INDEX(url):
     match=re.compile('<div><font size="2">(.+?)<a href="(.+?)".+?Click').findall(html)
     image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     for name,url in match:
-        name = clear_htmltags(name)
+        name = clear_htmltags(name).encode("utf-8")
         image_name = name[:4]
         image_url = image_base_url + image_name + '.jpg'
         #print image_url
@@ -166,6 +204,7 @@ def play_video(url):
         playlist.add(get_stream_url(one_url))
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
     player.play(playlist)
+    GA()
 
 def get_stream_url(url):
     domain = GetDomain(url)
@@ -259,6 +298,7 @@ def addLink(name,url,iconimage):
 
 
 def addDir(name,url,mode,iconimage):
+    print name
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)

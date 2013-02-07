@@ -8,6 +8,41 @@ import xbmcgui
 import xbmcaddon
 from t0mm0.common.net import Net
 
+
+def GA():
+    from random import randint
+    from urllib import urlencode
+    from urllib2 import urlopen
+    from urlparse import urlunparse
+    from hashlib import sha1
+    from os import environ
+    PROPERTY_ID = environ.get("GA_PROPERTY_ID", "UA-38297897")
+
+    # Generate the visitor identifier somehow. I get it from the
+    # environment, calculate the SHA1 sum of it, convert this from base 16
+    # to base 10 and get first 10 digits of this number.
+    VISITOR = environ.get("GA_VISITOR", "xxxxx")
+    VISITOR = str(int("0x%s" % sha1(VISITOR).hexdigest(), 0))[:10]
+
+    # The path to visit
+    PATH = "xbmc_einthusan"
+
+    # Collect everything in a dictionary
+    DATA = {"utmwv": "4.2.8-FRODO",
+            "utmn": str(randint(1, 9999999999)),
+            "utmp": PATH,
+            "utmac": PROPERTY_ID,
+            "utmcc": "__utma=%s;" % ".".join(["1", VISITOR, "1", "1", "1", "1"])}
+
+    # Encode this data and generate the final URL
+    URL = urlunparse(("http",
+                      "www.google-analytics.com",
+                      "/__utm.gif",
+                      "",
+                      urlencode(DATA),
+                      ""))
+    urlopen(URL).info()
+
 ##
 # Prints the main categories. Called when id is 0.
 ##
@@ -234,6 +269,7 @@ def play_video(url,name):
         playlist.add(stream_link, listitem)
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
     player.play(playlist)
+    GA()
 
 ##
 # Displays the setting view. Called when mode is 12

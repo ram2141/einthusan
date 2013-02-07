@@ -1,3 +1,6 @@
+[B]Version 0.2.8[/B] 
+- Added Google Analytics
+
 [B]Version 0.2.7[/B] 
 - Searching is possible after language selection (Was a bug before)
 

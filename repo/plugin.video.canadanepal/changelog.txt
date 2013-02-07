@@ -1,3 +1,9 @@
+[B]Version 0.3.4[/B]
+- Added Google Analytics
+
+[B]Version 0.3.3[/B]
+- Improved Http request by using t0mm0's library
+
 [B]Version 0.3.2[/B]
 - Clean HTML tags from names properly
 - Some new thumbnails, clear texture db to reload

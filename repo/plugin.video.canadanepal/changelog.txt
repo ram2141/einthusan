@@ -1,4 +1,4 @@
-[B]Version 0.3.4[/B]
+[B]Version 0.3.5[/B]
 - Added Google Analytics
 
 [B]Version 0.3.3[/B]

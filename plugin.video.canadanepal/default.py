@@ -8,6 +8,8 @@ import xbmcplugin,xbmcgui
 import xbmcaddon
 from t0mm0.common.net import Net
 
+ADDON = xbmcaddon.Addon(id='plugin.video.canadanepal')
+
 # Taken from desitvforum xbmc plugin.
 def GetDomain(url):
     print url
@@ -16,44 +18,6 @@ def GetDomain(url):
     if len(tmp) > 0:
         domain = tmp[0].replace('www.', '')
     return domain
-
-##
-# Google Analytics. By Mikey1234
-##
-def GA():
-    from random import randint
-    from urllib import urlencode
-    from urllib2 import urlopen
-    from urlparse import urlunparse
-    from hashlib import sha1
-    from os import environ
-    PROPERTY_ID = environ.get("GA_PROPERTY_ID", "UA-38304761")
-
-    # Generate the visitor identifier somehow. I get it from the
-    # environment, calculate the SHA1 sum of it, convert this from base 16
-    # to base 10 and get first 10 digits of this number.
-    VISITOR = environ.get("GA_VISITOR", "xxxxx")
-    VISITOR = str(int("0x%s" % sha1(VISITOR).hexdigest(), 0))[:10]
-
-    # The path to visit
-    PATH = "xbmc_canadanepal"
-
-    # Collect everything in a dictionary
-    DATA = {"utmwv": "4.2.8-FRODO",
-            "utmn": str(randint(1, 9999999999)),
-            "utmp": PATH,
-            "utmac": PROPERTY_ID,
-            "utmcc": "__utma=%s;" % ".".join(["1", VISITOR, "1", "1", "1", "1"])}
-
-    # Encode this data and generate the final URL
-    URL = urlunparse(("http",
-                      "www.google-analytics.com",
-                      "/__utm.gif",
-                      "",
-                      urlencode(DATA),
-                      ""))
-    urlopen(URL).info()
-    log("Executing GA (**************************************************************************")
 
 def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
@@ -67,6 +31,7 @@ def CATEGORIES():
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def get_sports(url, name):
+    GA("None", "Sports")
     html = Net().http_GET(url).content
     name = re.compile("(Score.+?)<").findall(html)
     address = get_dailymotion_link(html)
@@ -82,6 +47,7 @@ def get_previous(m_url, name, url):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
     
 def get_news(url, name):
+    GA("None", "News")
     html = Net().http_GET(url).content
     name=re.compile('Today\'s(.+?)<').findall(html)
     address = get_youtube_link(html)
@@ -91,6 +57,7 @@ def get_news(url, name):
     get_previous(url, name, 'http://canadanepal.info/dailynews/update.php')
 
 def SHOWRADIO(url):
+    GA("None", "Radio")
     html = Net().http_GET(url).content
     match=re.compile('<li><a href="(.+?)"  class="normal"  target="_self" ><span>(.+?)</span>').findall(html)
     for fm_url,name in match:
@@ -136,6 +103,7 @@ def INDEX(url):
 
 # Show the list of live tv 
 def SHOWLIVETVLIST(url):
+    GA("None", "TV")
     openfile = open(url, 'r')
     result = openfile.read()
     openfile.close()
@@ -195,6 +163,7 @@ def VIDEOLINKS(url,name):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def play_video(url):
+    GA("None", "Play")
     log("Playing " + url)
     all_url = url.split()
     length = len(all_url)
@@ -204,7 +173,6 @@ def play_video(url):
         playlist.add(get_stream_url(one_url))
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
     player.play(playlist)
-    GA()
 
 def get_stream_url(url):
     domain = GetDomain(url)
@@ -221,6 +189,7 @@ def get_stream_url(url):
     return stream_url
     
 def get_homePageStuff(url):
+    GA("None", "HomePage")
     html = Net().http_GET(url).content
     data = re.compile('<div id="bodyimg">((.|\n)+?)<!-- Fm Programs -->((.|\n)+?)<div id="Interview With Raju Lama">((.|\n)+?)<div id="Calender">').findall(html)
     get_homePageStuffHelper(data[0][0])
@@ -308,6 +277,95 @@ def addDir(name,url,mode,iconimage):
 
 def log(message):
     print "[CanadaNepal] " + message
+
+def send_request_to_google_analytics(utm_url):
+    ua='Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
+    import urllib2
+    try:
+        req = urllib2.Request(utm_url, None,
+                                    {'User-Agent':ua}
+                                     )
+        response = urllib2.urlopen(req).read()
+    except:
+        print ("GA fail: %s" % utm_url)         
+    return response
+  
+     
+def GA(group,name):
+    datapath = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+    VISITOR = os.path.join(datapath, 'visitor')
+    if os.path.exists(VISITOR):
+        print "It exists"
+        VISITOR = open(VISITOR).read()
+    else:
+        print "Creating the fiel now"
+
+        if not os.path.isdir(datapath):
+            try:
+                print "%s doesn't exists, creaitng.. " % datapath
+                os.makedirs(datapath)
+            except IOError, e:
+                print "Unable to create addon folder."
+                return 
+
+        from random import randint
+        txtfile = open(VISITOR,"w") 
+        txtfile.write(str(randint(0, 0x7fffffff)))
+        txtfile.close()
+        VISITOR = open(VISITOR).read()
+    try:
+        try:
+            from hashlib import md5
+        except:
+            from md5 import md5
+        from random import randint
+        import time
+        from urllib import unquote, quote
+        from os import environ
+        from hashlib import sha1
+        VERSION = "4.2.8"
+        UATRACK = "UA-38330258-2"
+        PROPERTY_ID = environ.get("GA_PROPERTY_ID", UATRACK)
+        PATH = "CanadaNepal"            
+        utm_gif_location = "http://www.google-analytics.com/__utm.gif"
+        if name=="None":
+                utm_url = utm_gif_location + "?" + \
+                        "utmwv=" + VERSION + \
+                        "&utmn=" + str(randint(0, 0x7fffffff)) + \
+                        "&utmp=" + quote(PATH) + \
+                        "&utmac=" + PROPERTY_ID + \
+                        "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
+        else:
+            if group=="None":
+                   utm_url = utm_gif_location + "?" + \
+                            "utmwv=" + VERSION + \
+                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
+                            "&utmp=" + quote(PATH+"/"+name) + \
+                            "&utmac=" + PROPERTY_ID + \
+                            "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
+            else:
+                   utm_url = utm_gif_location + "?" + \
+                            "utmwv=" + VERSION + \
+                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
+                            "&utmp=" + quote(PATH+"/"+group+"/"+name) + \
+                            "&utmac=" + PROPERTY_ID + \
+                            "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
+        if not group=="None":
+                utm_track = utm_gif_location + "?" + \
+                        "utmwv=" + VERSION + \
+                        "&utmn=" + str(randint(0, 0x7fffffff)) + \
+                        "&utmp=" + quote(PATH) + \
+                        "&utmt=" + "events" + \
+                        "&utme="+ quote("5("+PATH+"*"+group+"*"+name+")")+\
+                        "&utmac=" + PROPERTY_ID + \
+                        "&utmcc=__utma=%s" % ".".join(["1", "1", "1", VISITOR,"1","2"])
+
+        print "Analitycs: %s" % utm_url
+        send_request_to_google_analytics(utm_url)
+        print "Analitycs: %s" % utm_track
+        send_request_to_google_analytics(utm_track)
+    except:
+        print "================  CANNOT POST TO ANALYTICS  ================"
               
 params=get_params()
 url=None

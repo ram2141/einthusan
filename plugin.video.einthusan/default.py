@@ -1,47 +1,14 @@
 # Einthusan.com plugin written by humla.
 
+import os
 import re
-import urlresolver
-import urllib,urllib2
+import urllib
 import xbmcplugin
 import xbmcgui
 import xbmcaddon
 from t0mm0.common.net import Net
 
-
-def GA():
-    from random import randint
-    from urllib import urlencode
-    from urllib2 import urlopen
-    from urlparse import urlunparse
-    from hashlib import sha1
-    from os import environ
-    PROPERTY_ID = environ.get("GA_PROPERTY_ID", "UA-38297897")
-
-    # Generate the visitor identifier somehow. I get it from the
-    # environment, calculate the SHA1 sum of it, convert this from base 16
-    # to base 10 and get first 10 digits of this number.
-    VISITOR = environ.get("GA_VISITOR", "xxxxx")
-    VISITOR = str(int("0x%s" % sha1(VISITOR).hexdigest(), 0))[:10]
-
-    # The path to visit
-    PATH = "xbmc_einthusan"
-
-    # Collect everything in a dictionary
-    DATA = {"utmwv": "4.2.8-FRODO",
-            "utmn": str(randint(1, 9999999999)),
-            "utmp": PATH,
-            "utmac": PROPERTY_ID,
-            "utmcc": "__utma=%s;" % ".".join(["1", VISITOR, "1", "1", "1", "1"])}
-
-    # Encode this data and generate the final URL
-    URL = urlunparse(("http",
-                      "www.google-analytics.com",
-                      "/__utm.gif",
-                      "",
-                      urlencode(DATA),
-                      ""))
-    urlopen(URL).info()
+ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 
 ##
 # Prints the main categories. Called when id is 0.
@@ -61,6 +28,7 @@ def CATEGORIES():
 # Shows categories for each language
 ##
 def inner_categories(language): 
+    GA("None", language)
     addDir('A-Z', language, 8, '')
     addDir('Years', language, 9, '')
     addDir('Actors', language, 10,'')
@@ -245,6 +213,9 @@ def GUIEditExportName(name):
 #
 ##
 def play_video(url,name):
+    
+    GA("None", "Playing")
+    
     log("Playing " + name)
     log("Playing " + url)
     
@@ -269,7 +240,6 @@ def play_video(url,name):
         playlist.add(stream_link, listitem)
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
     player.play(playlist)
-    GA()
 
 ##
 # Displays the setting view. Called when mode is 12
@@ -313,6 +283,95 @@ def addDir(name,url,mode,iconimage):
 def log(message):
     print "[Eithusan] " + message
               
+def send_request_to_google_analytics(utm_url):
+    ua='Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
+    import urllib2
+    try:
+        req = urllib2.Request(utm_url, None,
+                                    {'User-Agent':ua}
+                                     )
+        response = urllib2.urlopen(req).read()
+    except:
+        print ("GA fail: %s" % utm_url)         
+    return response
+  
+     
+def GA(group,name):
+    datapath = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+    VISITOR = os.path.join(datapath, 'visitor')
+    if os.path.exists(VISITOR):
+        print "It exists"
+        VISITOR = open(VISITOR).read()
+    else:
+        print "Creating the fiel now"
+
+        if not os.path.isdir(datapath):
+            try:
+                print "%s doesn't exists, creaitng.. " % datapath
+                os.makedirs(datapath)
+            except IOError, e:
+                print "Unable to create addon folder."
+                return 
+
+        from random import randint
+        txtfile = open(VISITOR,"w") 
+        txtfile.write(str(randint(0, 0x7fffffff)))
+        txtfile.close()
+        VISITOR = open(VISITOR).read()
+    try:
+        try:
+            from hashlib import md5
+        except:
+            from md5 import md5
+        from random import randint
+        import time
+        from urllib import unquote, quote
+        from os import environ
+        from hashlib import sha1
+        VERSION = "4.2.8"
+        UATRACK = "UA-38330258-1"
+        PROPERTY_ID = environ.get("GA_PROPERTY_ID", UATRACK)
+        PATH = "Einthusan"            
+        utm_gif_location = "http://www.google-analytics.com/__utm.gif"
+        if name=="None":
+                utm_url = utm_gif_location + "?" + \
+                        "utmwv=" + VERSION + \
+                        "&utmn=" + str(randint(0, 0x7fffffff)) + \
+                        "&utmp=" + quote(PATH) + \
+                        "&utmac=" + PROPERTY_ID + \
+                        "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
+        else:
+            if group=="None":
+                   utm_url = utm_gif_location + "?" + \
+                            "utmwv=" + VERSION + \
+                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
+                            "&utmp=" + quote(PATH+"/"+name) + \
+                            "&utmac=" + PROPERTY_ID + \
+                            "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
+            else:
+                   utm_url = utm_gif_location + "?" + \
+                            "utmwv=" + VERSION + \
+                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
+                            "&utmp=" + quote(PATH+"/"+group+"/"+name) + \
+                            "&utmac=" + PROPERTY_ID + \
+                            "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
+        if not group=="None":
+                utm_track = utm_gif_location + "?" + \
+                        "utmwv=" + VERSION + \
+                        "&utmn=" + str(randint(0, 0x7fffffff)) + \
+                        "&utmp=" + quote(PATH) + \
+                        "&utmt=" + "events" + \
+                        "&utme="+ quote("5("+PATH+"*"+group+"*"+name+")")+\
+                        "&utmac=" + PROPERTY_ID + \
+                        "&utmcc=__utma=%s" % ".".join(["1", "1", "1", VISITOR,"1","2"])
+
+        print "Analitycs: %s" % utm_url
+        send_request_to_google_analytics(utm_url)
+        print "Analitycs: %s" % utm_track
+        send_request_to_google_analytics(utm_track)
+    except:
+        print "================  CANNOT POST TO ANALYTICS  ================"
+
 params=get_params()
 url=None
 name=None

@@ -285,10 +285,14 @@ def log(message):
               
 def send_request_to_google_analytics(utm_url):
     ua='Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
+
+    import locale
+    language = locale.getdefaultlocale()[0]
     import urllib2
     try:
         req = urllib2.Request(utm_url, None,
                                     {'User-Agent':ua}
+
                                      )
         response = urllib2.urlopen(req).read()
     except:
@@ -300,11 +304,8 @@ def GA(group,name):
     datapath = xbmc.translatePath(ADDON.getAddonInfo('profile'))
     VISITOR = os.path.join(datapath, 'visitor')
     if os.path.exists(VISITOR):
-        print "It exists"
         VISITOR = open(VISITOR).read()
     else:
-        print "Creating the fiel now"
-
         if not os.path.isdir(datapath):
             try:
                 print "%s doesn't exists, creaitng.. " % datapath

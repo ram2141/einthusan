@@ -171,11 +171,12 @@ def show_list(language, mode):
 # Shows the search box for serching. Shown when the id is 6.
 ##
 def show_search_box(language):
+    GA("None" , "Search")
     search_term = GUIEditExportName("")
 
     search_url = 'http://www.einthusan.com/search/?search_query=' + search_term + "&lang=" + language
 
-    html =  http_get(url)
+    html =  http_get(search_url)
     if (html == ""):
         return False
     match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(html)

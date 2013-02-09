@@ -9,6 +9,15 @@ import xbmcaddon
 from t0mm0.common.net import Net
 
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
+NAME = 'Einthusan'
+
+def http_get(url):
+    try:
+        html = Net().http_GET(url).content
+        return html
+    except:
+        xbmcgui.Dialog().ok(NAME, 'Unable to connect to website', '', '') 
+        return ""
 
 ##
 # Prints the main categories. Called when id is 0.
@@ -19,7 +28,8 @@ def CATEGORIES():
 
     addDir('Hindi', 'hindi', 7, '')
     addDir('Tamil', 'tamil', 7, '')
-    #addDir('ChandraMukhi Tamil Movie (Bluray Preview)', 'http://www.einthusan.com/movies/watch.php?id=56&bluray=true', 2, '')
+    addDir('Telugu', 'telugu', 7, '')
+    addDir('Malayalam', 'malayalam', 7, '')
     addDir('Addon Settings', '', 12, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -45,8 +55,10 @@ def inner_categories(language):
 ##
 def INDEX(url):
     print "Getting video links"
-    html = Net().http_GET(url).content
-
+    html =  http_get(url)
+    
+    if (html == ""):
+        return False
     match = re.compile('<a class="movie-cover-wrapper" href="(.+?)"><img src="(.+?)" alt="(.+?)"').findall(html)
 
     # Bit of a hack
@@ -140,7 +152,10 @@ def show_list(language, mode):
 
     BASE_URL = 'http://einthusan.com/movies/index.php'
     
-    html = Net().http_GET(url).content
+    html =  http_get(url)
+
+    if (html == ""):
+        return False
 
     list_div = re.compile('<div class="video-organizer-element-wrapper">(.+?)</div>').findall(html)
 
@@ -160,7 +175,9 @@ def show_search_box(language):
 
     search_url = 'http://www.einthusan.com/search/?search_query=' + search_term + "&lang=" + language
 
-    html = Net().http_GET(search_url).content
+    html =  http_get(url)
+    if (html == ""):
+        return False
     match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(html)
 
     # Bit of a hack again
@@ -219,7 +236,9 @@ def play_video(url,name):
     log("Playing " + name)
     log("Playing " + url)
     
-    html = Net().http_GET(url).content
+    html =  http_get(url)
+    if (html == ""):
+        return Fasle
 
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
 
@@ -291,13 +310,13 @@ def send_request_to_google_analytics(utm_url):
     import urllib2
     try:
         req = urllib2.Request(utm_url, None,
-                                    {'User-Agent':ua}
+                                    {'User-Agent':ua, 'Accept-Language': language}
 
                                      )
         response = urllib2.urlopen(req).read()
     except:
         print ("GA fail: %s" % utm_url)         
-    return response
+    return True
   
      
 def GA(group,name):
@@ -308,7 +327,6 @@ def GA(group,name):
     else:
         if not os.path.isdir(datapath):
             try:
-                print "%s doesn't exists, creaitng.. " % datapath
                 os.makedirs(datapath)
             except IOError, e:
                 print "Unable to create addon folder."
@@ -366,9 +384,7 @@ def GA(group,name):
                         "&utmac=" + PROPERTY_ID + \
                         "&utmcc=__utma=%s" % ".".join(["1", "1", "1", VISITOR,"1","2"])
 
-        print "Analitycs: %s" % utm_url
         send_request_to_google_analytics(utm_url)
-        print "Analitycs: %s" % utm_track
         send_request_to_google_analytics(utm_track)
     except:
         print "================  CANNOT POST TO ANALYTICS  ================"

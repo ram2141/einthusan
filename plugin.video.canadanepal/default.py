@@ -295,14 +295,10 @@ def GA(group,name):
     datapath = xbmc.translatePath(ADDON.getAddonInfo('profile'))
     VISITOR = os.path.join(datapath, 'visitor')
     if os.path.exists(VISITOR):
-        print "It exists"
         VISITOR = open(VISITOR).read()
     else:
-        print "Creating the fiel now"
-
         if not os.path.isdir(datapath):
             try:
-                print "%s doesn't exists, creaitng.. " % datapath
                 os.makedirs(datapath)
             except IOError, e:
                 print "Unable to create addon folder."
@@ -324,7 +320,7 @@ def GA(group,name):
         from os import environ
         from hashlib import sha1
         VERSION = "4.2.8"
-        UATRACK = "UA-38330258-2"
+        UATRACK = "UA-38330258-1"
         PROPERTY_ID = environ.get("GA_PROPERTY_ID", UATRACK)
         PATH = "CanadaNepal"            
         utm_gif_location = "http://www.google-analytics.com/__utm.gif"

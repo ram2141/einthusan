@@ -90,6 +90,7 @@ def clear_htmltags(name):
 
 # Lists the new episodes of TV series
 def INDEX(url):
+    GA("None", "Latest_Videos")
     html = Net().http_GET(url).content
     match=re.compile('<div><font size="2">(.+?)<a href="(.+?)".+?Click').findall(html)
     image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'

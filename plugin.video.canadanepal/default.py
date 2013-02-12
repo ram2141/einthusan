@@ -9,15 +9,22 @@ import xbmcaddon
 from t0mm0.common.net import Net
 
 ADDON = xbmcaddon.Addon(id='plugin.video.canadanepal')
+NAME = "CanadaNepal"
 
 # Taken from desitvforum xbmc plugin.
 def GetDomain(url):
-    print url
     tmp = re.compile('//(.+?)/').findall(url)
     domain = 'Unknown'
     if len(tmp) > 0:
         domain = tmp[0].replace('www.', '')
     return domain
+
+def make_http_get(url):
+    try:
+        return Net().http_GET(url).content
+    except:
+        xbmcgui.Dialog().ok(NAME, 'Unable to connect to website', '', '') 
+        return ""
 
 def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
@@ -32,14 +39,16 @@ def CATEGORIES():
 
 def get_sports(url, name):
     GA("None", "Sports")
-    html = Net().http_GET(url).content
+
+    html = make_http_get(url)
     name = re.compile("(Score.+?)<").findall(html)
     address = get_dailymotion_link(html)
     addDir(name[0], address[0],3,"")
     get_previous(url,name,"http://canadanepal.info/sports/update.php")
 
 def get_previous(m_url, name, url):
-    html = Net().http_GET(url).content
+
+    html = make_http_get(url)
 
     match = re.compile('<a href="(.+?)" .+?>.+?>(.+?)<') .findall(html)
     for u,name in match:
@@ -48,7 +57,10 @@ def get_previous(m_url, name, url):
     
 def get_news(url, name):
     GA("None", "News")
-    html = Net().http_GET(url).content
+    
+    html = make_http_get(url)
+
+
     name=re.compile('Today\'s(.+?)<').findall(html)
     address = get_youtube_link(html)
     if (len(name) > 0):
@@ -58,7 +70,9 @@ def get_news(url, name):
 
 def SHOWRADIO(url):
     GA("None", "Radio")
-    html = Net().http_GET(url).content
+
+    html = make_http_get(url)
+
     match=re.compile('<li><a href="(.+?)"  class="normal"  target="_self" ><span>(.+?)</span>').findall(html)
     for fm_url,name in match:
             addDir(name,url + fm_url,5,"")
@@ -73,7 +87,9 @@ def get_radio_links(html):
 
 # Scans the main FM page looking for stations that are available
 def AUDIOLINKS(url, name):
-    html = Net().http_GET(url).content
+
+    html = make_http_get(url)
+    
     match = get_radio_links(html)
     if (len(match) > 0):
         xbmc.Player().play(match[0], "")
@@ -91,7 +107,9 @@ def clear_htmltags(name):
 # Lists the new episodes of TV series
 def INDEX(url):
     GA("None", "Latest_Videos")
-    html = Net().http_GET(url).content
+
+    html = make_http_get(url)
+    
     match=re.compile('<div><font size="2">(.+?)<a href="(.+?)".+?Click').findall(html)
     image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     for name,url in match:
@@ -144,7 +162,9 @@ def get_blip_tv_link(html):
     
 def VIDEOLINKS(url,name):
     print "Getting video links"
-    html = Net().http_GET(url).content
+
+    html = make_http_get(url)
+    
     match = get_youtube_link(html)
     if (len(match) == 0):
         match = get_blip_tv_link(html)
@@ -191,7 +211,9 @@ def get_stream_url(url):
     
 def get_homePageStuff(url):
     GA("None", "HomePage")
-    html = Net().http_GET(url).content
+
+    html = make_http_get(url)
+    
     data = re.compile('<div id="bodyimg">((.|\n)+?)<!-- Fm Programs -->((.|\n)+?)<div id="Interview With Raju Lama">((.|\n)+?)<div id="Calender">').findall(html)
     get_homePageStuffHelper(data[0][0])
     get_homePageStuffHelper(data[0][4])

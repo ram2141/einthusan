@@ -8,8 +8,8 @@ import xbmcplugin,xbmcgui
 import xbmcaddon
 from t0mm0.common.net import Net
 
-ADDON = xbmcaddon.Addon(id='plugin.video.bharatcinemas')
-NAME = "BharatCinemas"
+ADDON = xbmcaddon.Addon(id='plugin.video.bharathcinemas')
+NAME = "BharathCinemas"
 
 # Taken from desitvforum xbmc plugin.
 def GetDomain(url):
@@ -45,6 +45,17 @@ def index_homepage(url):
     for match in matches:
         addDir(match[2], match[1], 3, match[0]);
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+# Get a list of video links
+def get_video_links(name, url):
+    html = make_http_get(url)
+    
+    links = re.compile("link: (.+?)'.+?>(.+?)<").findall(html)
+
+    for link,label in links:
+        print label + " -~> " + link
+    
+
 
 ##################################################### Generic Stuff ###################
 def get_params():

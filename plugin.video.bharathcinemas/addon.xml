@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.bharatcinemas"
-       name="BharatCinemas"
+<addon id="plugin.video.bharathcinemas"
+       name="BharathCinemas"
        version="0.0.1"
        provider-name="humla">
     <requires>
@@ -13,6 +13,6 @@
     <extension point="xbmc.addon.metadata">
         <platform>all</platform>
         <summary>Watch Hindi, Tamil  movies</summary>
-        <description>This XBMC plugin allows to watch Hindi and Tamil movies from bharatcinemas.info. Please support them.</description>
+        <description>This XBMC plugin allows to watch Hindi and Tamil movies from bharathcinemas.info. Please support them.</description>
     </extension>
 </addon>

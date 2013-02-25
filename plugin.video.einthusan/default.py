@@ -81,7 +81,6 @@ def INDEX(url):
 #
 ##
 def show_recent_sections(language):
-    
     INDEX_URL = 'http://www.einthusan.com/movies/index.php?organize=Activity&org_type=Activity&page=1&lang='+language
 
     addDir('Recently Posted', INDEX_URL + '&filtered=RecentlyPosted', 1, '')

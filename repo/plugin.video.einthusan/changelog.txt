@@ -1,4 +1,7 @@
 [B]Version 0.3.0[/B] 
+- Added some icons. 
+
+[B]Version 0.3.0[/B] 
 - Telugu and Malayalam sections added
 
 [B]Version 0.2.9[/B] 

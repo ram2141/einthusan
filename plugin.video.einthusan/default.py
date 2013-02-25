@@ -11,6 +11,8 @@ from t0mm0.common.net import Net
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 NAME = 'Einthusan'
 
+ADDON_PATH = ADDON.getAddonInfo("path");
+
 def http_get(url):
     try:
         html = Net().http_GET(url).content
@@ -24,12 +26,12 @@ def http_get(url):
 ##
 def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
-    img_path = cwd + '/images/'
+    img_path = cwd + '/images/' 
 
-    addDir('Hindi', 'hindi', 7, '')
-    addDir('Tamil', 'tamil', 7, '')
-    addDir('Telugu', 'telugu', 7, '')
-    addDir('Malayalam', 'malayalam', 7, '')
+    addDir('Hindi', 'hindi', 7, img_path + '/Hindi_Movies.png')
+    addDir('Tamil', 'tamil', 7,img_path + '/Tamil_Movies.png')
+    addDir('Telugu', 'telugu', 7, img_path + '/Telugu_Movies.png')
+    addDir('Malayalam', 'malayalam', 7, img_path + '/Malayalam_Movies.png')
     addDir('Addon Settings', '', 12, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -39,6 +41,10 @@ def CATEGORIES():
 ##
 def inner_categories(language): 
     GA("None", language)
+
+    cwd = xbmcaddon.Addon().getAddonInfo('path')
+    img_path = cwd + '/images/' 
+
     addDir('A-Z', language, 8, '')
     addDir('Years', language, 9, '')
     addDir('Actors', language, 10,'')
@@ -46,7 +52,7 @@ def inner_categories(language):
     addDir('Recent', language, 3,'')
     addDir('Top Viewed', language, 4,'')
     addDir('Top Rated', language, 5,'')
-    addDir('Search', language, 6, '')
+    addDir('Search', language, 6, img_path + '/Search_by_title.png')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 

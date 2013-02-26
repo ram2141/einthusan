@@ -40,31 +40,66 @@ def list_latest_BluRay_releases():
 def list_latest_DVD_releases():
     return False
 
-def list_latest_movies():
-    return False
-
-def list_most_viewed_movies():
-    return False
-
-# Shows the different Categories
+# Shows the different Categories. ID=0
 def initial_categories():
     addDir("HomePage" , "http://desionlinetheater.com/", 1, "")
     #addDir("Hindi", "http://www.bharathcinemas.info/category/watch-hindi-movies-online/",1, "")
     #addDir("Tamil", "http://www.bharathcinemas.info/category/watch-tamil-movies-online/",1, "")
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-# Called when id is 
+# ID=1
 def list_homepage_options():
-    addDir("Most Viewed", "", 2, "")
+    #addDir("Most Viewed", "", 2, "")
     addDir("Latest Movies", "", 3, "")
     addDir("Latest DVD Releases", "", 4, "")
     addDir("Latest BluRays", "", 4, "")
     addDir("Latest Trailers", "", 4, "")
-    xbmcplugin.endOfDirectory(int(sys.argv[1]))    
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
     return False
 
+# ID=2
+def list_most_viewed_movies():
+    return False
 
-##################################################### Generic Stuff ###################
+# ID=3
+def list_latest_movies():
+    url = "http://desionlinetheater.com/"
+    html = make_http_get(url)
+
+    matches = re.compile('href="(.+?)"> <img class="ethumb" src="(.+?)".+?').findall(html)
+    
+    for url, image in matches:
+        name = image.split('/')[-1].split('.')[0].replace('+', ' ')
+        addDir(name, url, 7, image)
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+# ID=4
+def parse_JSON_to_get_latest_DVD_bluray():
+    return False
+
+# ID=5
+# This is provided with a url of sominaltv and it gets the corresponding links to
+# desionlinetheater and calls the functions below.
+def get_links_for_a_video(name, url):
+    html = make_http_get(url)
+
+    matches = re.compile('"http://adf.ly/\d+/(.+?)"').findall(html)
+    ## TODO: Add notifications dialog box
+    for match in matches:
+        add_video_link(name, match)
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+# This is provided with url of desionlinetheater and it adds any video links
+# it finds on it.
+def add_video_link(name, url):
+    html = make_http_get(url)
+
+    matches = re.compile('').findall(html)
+    
+
+
+########################### Start of Generic Stuff ###########################
 
 def get_params():
     param=[]
@@ -92,7 +127,6 @@ def addLink(name,url,iconimage):
 
 
 def addDir(name,url,mode,iconimage):
-    print name
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
@@ -129,7 +163,7 @@ print "URL: " + str(url)
 # 2: For indexing movies from HomePage
 # 3: For getting a list of video links
 
-if mode==None or url==None or len(url)<1:
+if mode==None:
     initial_categories()
 elif mode==1:
     list_homepage_options()
@@ -143,3 +177,5 @@ elif mode==5:
     list_latest_BluRay_releases()
 elif mode==6:
     list_latest_trailers()
+elif mode==7:
+    get_links_for_a_video(name, url)

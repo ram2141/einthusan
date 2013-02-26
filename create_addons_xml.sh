@@ -10,9 +10,12 @@ echo "<addons>" >> $addons_file
 for plugin in `ls -d */`
 do
     if [ -f $plugin/addon.xml ]
-        then
-            echo "Adding " $plugin
+    then
+        if [ ! -f  $plugin/pre_release ]
+        then 
+             echo "Adding " $plugin
             tail --lines=+2  $plugin/addon.xml >> $addons_file
+        fi
     fi
 done
 echo "</addons>" >> $addons_file

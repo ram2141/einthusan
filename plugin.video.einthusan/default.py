@@ -43,9 +43,14 @@ def create_cookie_file():
 def login_to_website():
     login_url = "http://www.einthusan.com/etc/login.php"
 
+    username = xbmcplugin.getSetting(int(sys.argv[1]), 'username')
+    password = xbmcplugin.getSetting(int(sys.argv[1]), 'password')
+
+    if (username == '' or password == ''):
+        return False
     form_data = {}
-    form_data['username'] = xbmcplugin.getSetting(int(sys.argv[1]), 'username')
-    form_data['password'] = xbmcplugin.getSetting(int(sys.argv[1]), 'password')
+    form_data['username'] = username
+    form_data['password'] = password
 
     cookie_file = create_cookie_file()
     net = Net(cookie_file)

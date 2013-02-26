@@ -1,3 +1,5 @@
 <strings>
-    <string id="30000">Highest Video Quality</string>
+    <string id="3001">Highest Video Quality</string>
+    <string id="3002">Username</string>
+    <string id="3003">Password</string>
 </strings>

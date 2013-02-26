@@ -13,13 +13,46 @@ NAME = 'Einthusan'
 
 ADDON_PATH = ADDON.getAddonInfo("path");
 
-def http_get(url):
+def http_get(url, login=False):
+    cookie_file = create_cookie_file()
+    if login:
+        login_to_website()
+    net = Net(cookie_file)
     try:
-        html = Net().http_GET(url).content
+        html = net.http_GET(url).content
         return html
     except:
         xbmcgui.Dialog().ok(NAME, 'Unable to connect to website', '', '') 
         return ""
+
+
+def create_cookie_file():
+    try:
+        ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+        cookie_file = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
+        if not os.path.exists(cookie_file):
+            print "Creating the cookie file"
+            open(cookie_file,'w').close()
+        return cookie_file
+    except:
+        return cookie_file
+
+##
+# Logs into the website
+##
+def login_to_website():
+    login_url = "http://www.einthusan.com/etc/login.php"
+
+    form_data = {}
+    form_data['username'] = xbmcplugin.getSetting(int(sys.argv[1]), 'username')
+    form_data['password'] = xbmcplugin.getSetting(int(sys.argv[1]), 'password')
+
+    cookie_file = create_cookie_file()
+    net = Net(cookie_file)
+    try:
+        net.http_POST(login_url, form_data)
+    except:
+        xbmcgui.Dialog().ok(NAME, 'Unable to login to website', '', '') 
 
 ##
 # Prints the main categories. Called when id is 0.
@@ -28,33 +61,45 @@ def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/' 
 
-    addDir('Hindi', 'hindi', 7, img_path + '/Hindi_Movies.png')
-    addDir('Tamil', 'tamil', 7,img_path + '/Tamil_Movies.png')
-    addDir('Telugu', 'telugu', 7, img_path + '/Telugu_Movies.png')
-    addDir('Malayalam', 'malayalam', 7, img_path + '/Malayalam_Movies.png')
-    addDir('Addon Settings', '', 12, '')
+    addDir('Hindi', '', 7, img_path + '/Hindi_Movies.png', 'hindi')
+    addDir('Tamil', '', 7,img_path + '/Tamil_Movies.png', 'tamil')
+    addDir('Telugu', '', 7, img_path + '/Telugu_Movies.png', 'telugu')
+    addDir('Malayalam', '', 7, img_path + '/Malayalam_Movies.png', 'malayalam')
+    addDir('Addon Settings', '', 12, '', '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
 # Shows categories for each language
 ##
-def inner_categories(language): 
-    GA("None", language)
+def inner_categories(language, bluray=False): 
 
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/' 
 
-    addDir('A-Z', language, 8, '')
-    addDir('Years', language, 9, '')
-    addDir('Actors', language, 10,'')
-    addDir('Director', language, 11,'')
-    addDir('Recent', language, 3,'')
-    addDir('Top Viewed', language, 4,'')
-    addDir('Top Rated', language, 5,'')
-    addDir('Search', language, 6, img_path + '/Search_by_title.png')
+    base_url = 'http://www.einthusan.com/movies/'
+    if bluray:
+        base_url = 'http://www.einthusan.com/bluray/'
+
+    addDir('A-Z', base_url, 8, '', language)
+    addDir('Years', base_url, 9, '', language)
+    addDir('Actors', base_url, 10,'', language)
+    addDir('Director', base_url, 11,'', language)
+    addDir('Recent', base_url, 3,'', language)
+    addDir('Top Viewed', base_url, 4,'', language)
+    addDir('Top Rated', base_url, 5, '', language)
+    if not bluray:
+        addDir('Blu-Ray', '', 13, img_path + '/Bluray.png', language)
+        addDir('Search', '', 6, img_path + '/Search_by_title.png', language)
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+##
+#  Displays the categories for Blu-Ray
+#
+def display_BluRay_listings(language):
+    inner_categories(language, True)
+
 
 ##
 #  Scrapes a list of movies from the website. Called when mode is 1.
@@ -63,13 +108,11 @@ def INDEX(url):
     print "Getting video links"
     html =  http_get(url)
     
-    if (html == ""):
-        return False
-    match = re.compile('<a class="movie-cover-wrapper" href="(.+?)"><img src="(.+?)" alt="(.+?)"').findall(html)
+    match = re.compile('<div class="video-object-thumb"><a href="(.+?)">.+?<a class="movie-cover-wrapper".+?><img src="(.+?)" alt="(.+?)"').findall(html)
 
     # Bit of a hack
     MOVIES_URL = "http://www.einthusan.com/movies/"
-    for page_link,image,name in match:
+    for page_link, image, name in match:
         addDir(name, MOVIES_URL + page_link, 2, MOVIES_URL + image)
 
 
@@ -78,7 +121,7 @@ def INDEX(url):
     if (len(numerical_nav) > 0):
         next_page = re.compile('<a class="numerical-nav-selected" href=".+?">.+?</a><a href=".+?">(.+?)</a>').findall(numerical_nav[0])
         if (len(next_page) == 1):
-            addDir("Next >>", url + "&page=" + next_page[0], 1, "http://www.sahara.co.za/Images/next.jpg")
+            addDir("Next >>", url + "&page=" + next_page[0], 1, "http://www.sahara.co.za/Images/next.jpg", '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -86,35 +129,35 @@ def INDEX(url):
 #  Just displays the two recent sections. Called when id is 3.
 #
 ##
-def show_recent_sections(language):
-    INDEX_URL = 'http://www.einthusan.com/movies/index.php?organize=Activity&org_type=Activity&page=1&lang='+language
+def show_recent_sections(url, language):
+    INDEX_URL = url + 'index.php?organize=Activity&org_type=Activity&page=1&lang='+language
 
-    addDir('Recently Posted', INDEX_URL + '&filtered=RecentlyPosted', 1, '')
-    addDir('Recently Viewed', INDEX_URL + '&filtered=RecentlyViewed', 1, '')
+    addDir('Recently Posted', INDEX_URL + '&filtered=RecentlyPosted', 1, '', '')
+    addDir('Recently Viewed', INDEX_URL + '&filtered=RecentlyViewed', 1, '', '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
 # Shows the sections for Top Viewed. Called when id is 4.
 #
 ##
-def show_top_viewed_options(language):
-    INDEX_URL = 'http://www.einthusan.com/movies/index.php?organize=Statistics&org_type=Statistics&page=1&lang='+language
+def show_top_viewed_options(url, language):
+    INDEX_URL = url + 'index.php?organize=Statistics&org_type=Statistics&page=1&lang='+language
 
-    addDir('All Time', INDEX_URL + '&filtered=AllTimeViews' , 1, '')
-    addDir('This Week', INDEX_URL + '&filtered=ThisWeekViews', 1, '')
-    addDir('Last Week', INDEX_URL + '&filtered=LastWeekViews', 1, '')
-    addDir('This Month', INDEX_URL + '&filtered=ThisMonthViews', 1, '')
-    addDir('Last Month', INDEX_URL + '&filtered=LastMonthViews' , 1, '')
-    addDir('This Year', INDEX_URL + '&filtered=ThisYearViews' , 1, '')
-    addDir('Last Year', INDEX_URL + '&filtered=LastYearViews' , 1, '')
+    addDir('All Time', INDEX_URL + '&filtered=AllTimeViews' , 1, '', '')
+    addDir('This Week', INDEX_URL + '&filtered=ThisWeekViews', 1, '', '')
+    addDir('Last Week', INDEX_URL + '&filtered=LastWeekViews', 1, '', '')
+    addDir('This Month', INDEX_URL + '&filtered=ThisMonthViews', 1, '', '')
+    addDir('Last Month', INDEX_URL + '&filtered=LastMonthViews' , 1, '', '')
+    addDir('This Year', INDEX_URL + '&filtered=ThisYearViews' , 1, '', '')
+    addDir('Last Year', INDEX_URL + '&filtered=LastYearViews' , 1, '', '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
 # Displays the options for Top Rated. Called when id is 5.
 #
 ##
-def show_top_rated_options(language):
-    INDEX_URL = 'http://einthusan.com/movies/index.php?organize=Rating&org_type=Rating&page=1&lang=' + language
+def show_top_rated_options(url, language):
+    INDEX_URL = url + 'index.php?organize=Rating&org_type=Rating&page=1&lang=' + language
 
     addDir('Romance', INDEX_URL + '&filtered=Romance', 1, '')
     addDir('Comedy', INDEX_URL + '&filtered=Comedy', 1, '')
@@ -127,10 +170,10 @@ def show_top_rated_options(language):
 ##
 # Displays the options for A-Z view. Called when id is 8.
 ##
-def show_A_Z(language):
+def show_A_Z(url, language):
     azlist = map (chr, range(65,91))
 
-    INDEX_URL = 'http://www.einthusan.com/movies/index.php?organize=Alphabetical&org_type=Alphabetical&lang='+language
+    INDEX_URL = url + 'index.php?organize=Alphabetical&org_type=Alphabetical&lang='+language
 
     addDir('Numerical', INDEX_URL + '&filtered=Numerical', 1, '')
 
@@ -146,21 +189,18 @@ def show_A_Z(language):
 # 10: List of Actors
 # 11: List of directors
 ## 
-def show_list(language, mode):
+def show_list(b_url, language, mode):
 
-    url = 'http://www.einthusan.com/movies/index.php?organize=Director'
+    url = b_url + 'index.php?organize=Director'
     if (mode == 9):
-        url = 'http://einthusan.com/movies/index.php?organize=Year'
+        url = b_url + 'index.php?organize=Year'
     elif (mode == 10):
-        url = 'http://www.einthusan.com/movies/index.php?organize=Cast'
+        url = b_url + 'index.php?organize=Cast'
     url = url + "&lang="+language
 
-    BASE_URL = 'http://einthusan.com/movies/index.php'
+    BASE_URL = b_url + 'index.php'
     
     html =  http_get(url)
-
-    if (html == ""):
-        return False
 
     list_div = re.compile('<div class="video-organizer-element-wrapper">(.+?)</div>').findall(html)
 
@@ -182,8 +222,7 @@ def show_search_box(language):
     search_url = 'http://www.einthusan.com/search/?search_query=' + search_term + "&lang=" + language
 
     html =  http_get(search_url)
-    if (html == ""):
-        return False
+
     match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(html)
 
     # Bit of a hack again
@@ -236,16 +275,10 @@ def GUIEditExportName(name):
 #
 ##
 def play_video(url,name):
-    
-    GA("None", "Playing")
-    
-    log("Playing " + name)
-    log("Playing " + url)
-    
-    html =  http_get(url)
-    if (html == ""):
-        return Fasle
 
+    print "Playing URL : " + url
+
+    html =  http_get(url, True)
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
 
     if (len(match) == 0):
@@ -297,125 +330,38 @@ def addLink(name,url,iconimage):
     return ok
 
 
-def addDir(name,url,mode,iconimage):
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
+def addDir(name,url,mode,iconimage, lang=''):
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&lang="+str(lang)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
-
-def log(message):
-    print "[Eithusan] " + message
-              
-def send_request_to_google_analytics(utm_url):
-    ua='Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
-
-    import locale
-    language = locale.getdefaultlocale()[0]
-    import urllib2
-    try:
-        req = urllib2.Request(utm_url, None,
-                                    {'User-Agent':ua, 'Accept-Language': language}
-
-                                     )
-        response = urllib2.urlopen(req).read()
-    except:
-        print ("GA fail: %s" % utm_url)         
-    return True
-  
-     
-def GA(group,name):
-    datapath = xbmc.translatePath(ADDON.getAddonInfo('profile'))
-    VISITOR = os.path.join(datapath, 'visitor')
-    if os.path.exists(VISITOR):
-        VISITOR = open(VISITOR).read()
-    else:
-        if not os.path.isdir(datapath):
-            try:
-                os.makedirs(datapath)
-            except IOError, e:
-                print "Unable to create addon folder."
-                return 
-
-        from random import randint
-        txtfile = open(VISITOR,"w") 
-        txtfile.write(str(randint(0, 0x7fffffff)))
-        txtfile.close()
-        VISITOR = open(VISITOR).read()
-    try:
-        try:
-            from hashlib import md5
-        except:
-            from md5 import md5
-        from random import randint
-        import time
-        from urllib import unquote, quote
-        from os import environ
-        from hashlib import sha1
-        VERSION = "4.2.8"
-        UATRACK = "UA-38330258-1"
-        PROPERTY_ID = environ.get("GA_PROPERTY_ID", UATRACK)
-        PATH = "Einthusan"            
-        utm_gif_location = "http://www.google-analytics.com/__utm.gif"
-        if name=="None":
-                utm_url = utm_gif_location + "?" + \
-                        "utmwv=" + VERSION + \
-                        "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                        "&utmp=" + quote(PATH) + \
-                        "&utmac=" + PROPERTY_ID + \
-                        "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
-        else:
-            if group=="None":
-                   utm_url = utm_gif_location + "?" + \
-                            "utmwv=" + VERSION + \
-                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                            "&utmp=" + quote(PATH+"/"+name) + \
-                            "&utmac=" + PROPERTY_ID + \
-                            "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
-            else:
-                   utm_url = utm_gif_location + "?" + \
-                            "utmwv=" + VERSION + \
-                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                            "&utmp=" + quote(PATH+"/"+group+"/"+name) + \
-                            "&utmac=" + PROPERTY_ID + \
-                            "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
-        if not group=="None":
-                utm_track = utm_gif_location + "?" + \
-                        "utmwv=" + VERSION + \
-                        "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                        "&utmp=" + quote(PATH) + \
-                        "&utmt=" + "events" + \
-                        "&utme="+ quote("5("+PATH+"*"+group+"*"+name+")")+\
-                        "&utmac=" + PROPERTY_ID + \
-                        "&utmcc=__utma=%s" % ".".join(["1", "1", "1", VISITOR,"1","2"])
-
-        send_request_to_google_analytics(utm_url)
-        send_request_to_google_analytics(utm_track)
-    except:
-        print "================  CANNOT POST TO ANALYTICS  ================"
-
+            
 params=get_params()
 url=None
 name=None
 mode=None
+language=None
+quality=None
 
 try:
-        url=urllib.unquote_plus(params["url"])
+    url=urllib.unquote_plus(params["url"])
 except:
-        pass
+    pass
 try:
-        name=urllib.unquote_plus(params["name"])
+    name=urllib.unquote_plus(params["name"])
 except:
-        pass
+    pass
 try:
-        mode=int(params["mode"])
+    mode=int(params["mode"])
 except:
-        pass
+    pass
+try:
+    language=urllib.unquote_plus(params["lang"])
+except:
+    pass
 
-print "Mode: " + str(mode)
-print "Name: " + str(name)
-print "URL: " + str(url)
 
 # Modes
 # 0: The main Categories Menu. Selection of language
@@ -439,25 +385,20 @@ elif mode==1:
 elif mode==2:
     play_video(url,name)
 elif mode==3:
-    ## Here url is used to transport the language
-    show_recent_sections(url)
+    show_recent_sections(url, language)
 elif mode==4:
-    ## Here url is used to transport the language
-    show_top_viewed_options(url)
+    show_top_viewed_options(url, language)
 elif mode==5:
-    ## Here url is used to transport the language
-    show_top_rated_options(url)
+    show_top_rated_options(url, language)
 elif mode==6:
-    ## Here url is used to transport the language
-    show_search_box(url)
+    show_search_box(language)
 elif mode==7:
-    ## Here url is used to transport the language
-    inner_categories(url) 
+    inner_categories(language) 
 elif mode==8:
-    ## Here url is used to transport the lanuage
-    show_A_Z(url)
+    show_A_Z(url, language)
 elif mode in [9,10,11]:
-    ## Here url is used to transport language
-    show_list(url, mode)
+    show_list(url, language, mode)
 elif mode==12:
-    display_setting();
+    display_setting()
+elif mode==13:
+    display_BluRay_listings(language)

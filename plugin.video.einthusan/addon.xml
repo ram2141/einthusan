@@ -13,6 +13,8 @@
     <extension point="xbmc.addon.metadata">
         <platform>all</platform>
         <summary>Watch Hindi, Tamil  movies</summary>
-        <description>This XBMC plugin allows to watch Hindi and Tamil movies from Einthusan.com. Please support them.</description>
+        <description>This XBMC plugin allows to watch Hindi and Tamil movies from Einthusan.com. Please support them.
+
+        Credits to suriya222 for the thumbnails.</description>
     </extension>
 </addon>

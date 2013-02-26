@@ -1,3 +1,4 @@
 <settings>
-   <setting id="video_quality" type="enum" label="30000" values="SD|HQ|HD" default="HQ"/>
+   <setting id="username" type="text" label="3002" default="" />
+   <setting id="password" type="text" option="hidden" label="3003" enable="!eq(-1,)" default="" />
 </settings>

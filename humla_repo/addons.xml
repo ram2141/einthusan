@@ -21,7 +21,7 @@
 </addon>
 <addon id="plugin.video.einthusan"
        name="Einthusan"
-       version="0.3.2"
+       version="0.4.0"
        provider-name="humla">
     <requires>
         <import addon="xbmc.python" version="2.0"/>
@@ -33,7 +33,9 @@
     <extension point="xbmc.addon.metadata">
         <platform>all</platform>
         <summary>Watch Hindi, Tamil  movies</summary>
-        <description>This XBMC plugin allows to watch Hindi and Tamil movies from Einthusan.com. Please support them.</description>
+        <description>This XBMC plugin allows to watch Hindi and Tamil movies from Einthusan.com. Please support them.
+
+        Credits to suriya222 for the thumbnails.</description>
     </extension>
 </addon>
 <addon id="repository.humla" name="humla Add-on Repository" version="1.0.3" provider-name="humla">

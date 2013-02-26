@@ -1,4 +1,6 @@
-[B]Version 0.3.0[/B] 
+[B]Version 0.4.0[/B] 
+- Added Blu-Ray section.
+- Allow user to login to play bluray movies.
 - Added some icons. 
 
 [B]Version 0.3.0[/B] 

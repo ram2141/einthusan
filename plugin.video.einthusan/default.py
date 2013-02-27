@@ -221,7 +221,6 @@ def show_list(b_url, language, mode):
 # Shows the search box for serching. Shown when the id is 6.
 ##
 def show_search_box(language):
-    GA("None" , "Search")
     search_term = GUIEditExportName("")
 
     search_url = 'http://www.einthusan.com/search/?search_query=' + search_term + "&lang=" + language
@@ -253,7 +252,6 @@ def show_search_box(language):
 #                                                       #
 #########################################################
 def GUIEditExportName(name):
-
     exit = True 
     while (exit):
           kb = xbmc.Keyboard('default', 'heading', True)
@@ -280,9 +278,7 @@ def GUIEditExportName(name):
 #
 ##
 def play_video(url,name):
-
     print "Playing URL : " + url
-
     html =  http_get(url, True)
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
 
@@ -308,7 +304,7 @@ def play_video(url,name):
 # Displays the setting view. Called when mode is 12
 ##
 def display_setting():
-    xbmcaddon.Addon(id='plugin.video.einthusan').openSettings()
+    ADDON.openSettings()
 
 def get_params():
     param=[]

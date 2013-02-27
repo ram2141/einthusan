@@ -1,25 +1,31 @@
-<channel>
+<channel_pre>
 <name>ABC TV</name>
 <image>http://canadanepal.info/images/banner/ABCtv.jpg</image>
 <link>rtmp://202.79.58.13/live/livestream swfUrl=http://canadanepal.info/tvfilmy/player.swf pageUrl=http://canadanepal.info/live/TV-Filmy.php tcUrl=rtmp://202.79.58.13/live live=1</link>
-</channel>
+</channel_pre>
 
-<progress>
+<channel_test>
 <name>Nepali Lok Geet</name>
 <image>http://2.bp.blogspot.com/-clJfJAUUwjg/TclSWnUlvgI/AAAAAAAAE1Q/rcMe_F1Aggc/s1600/nepali_dohori.png</image>
-<link>rtmp://cp133304.live.edgefcs.net/live/ playpath=channel1@62057 swfurl=http://www.startv.in/flash/liveplayer.swf pageurl=http://www.npvideo.com/channel.php?id=9 live=true swfvfy=true</link> This is channel V's link
-</progress>
+<link>rtmp://xlokgeetx.e.channel.livestream.com/ playpath=/mogulus-edge/lokgeet swfurl=http://cdn.livestream.com/chromelessPlayer/v21/playerapi.swf pageUrl=http://cdn.livestream.com/embed/lokgeet</link>
+</channel>
 
 <channel>
 <name>NTV</name>
 <image>http://canadanepal.info/live/images/nepal_tv.jpg</image>
-<link>rtmp://streamer.istreamlive.net/1_192_309_60/nepaltelevision swfUrl=http://www.npvideo.com/config-js/player.swf pageUrl=http://www.npvideo.com/channel.php?id=1 tcUrl=rtmp://streamer.istreamlive.net/1_192_309_60 live=1</link>
+<link>rtmp://nepaltv.streamer1.net/live/ playpath=ntvchannel2 pageUrl=http://www.npvideo.com/channel.php?id=1 swfUrl=http://www.npvideo.com/config-js/player.swf</link>
 </channel>
 
 <channel>
-<name>NTV Plus</name>
+<name>NTV (Low Quality Alternative)</name>
+<image>http://canadanepal.info/live/images/nepal_tv.jpg</image>
+<link>rtmp://nepaltv.streamer1.net/live/ playPath=nepaltelevisionplus swfUrl=http://www.npvideo.com/config-js/player.swf pageUrl=http://www.npvideo.com/channel.php?id=15</link>
+</channel>
+
+<channel>
+<name>NTV Plus (Low Quality Alternative)</name>
 <image>http://canadanepal.info/live/images/nepal_tv_plus.jpg</image>
-<link>rtmp://streamer.istreamlive.net/1_192_309_60/nepaltelevisionplus swfUrl=http://www.npvideo.com/config-js/player.swf pageUrl=http://www.npvideo.com/channel.php?id=9 tcUrl=rtmp://streamer.istreamlive.net/1_192_309_60 live=1</link>
+<link>rtmp://nepaltv.streamer1.net/live/ playPath=ntvchannel swfUrl=http://www.npvideo.com/config-js/player.swf pageUrl=http://www.npvideo.com/channel.php?id=17</link>
 </channel>
 
 <channel>

@@ -38,8 +38,6 @@ def CATEGORIES():
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def get_sports(url, name):
-    GA("None", "Sports")
-
     html = make_http_get(url)
     name = re.compile("(Score.+?)<").findall(html)
     address = get_dailymotion_link(html)
@@ -47,20 +45,14 @@ def get_sports(url, name):
     get_previous(url,name,"http://canadanepal.info/sports/update.php")
 
 def get_previous(m_url, name, url):
-
     html = make_http_get(url)
-
     match = re.compile('<a href="(.+?)" .+?>.+?>(.+?)<') .findall(html)
     for u,name in match:
         addDir(name, m_url+u, 2 ,"")
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
     
 def get_news(url, name):
-    GA("None", "News")
-    
     html = make_http_get(url)
-
-
     name=re.compile('Today\'s(.+?)<').findall(html)
     address = get_youtube_link(html)
     if (len(name) > 0):
@@ -69,10 +61,7 @@ def get_news(url, name):
     get_previous(url, name, 'http://canadanepal.info/dailynews/update.php')
 
 def SHOWRADIO(url):
-    GA("None", "Radio")
-
     html = make_http_get(url)
-
     match=re.compile('<li><a href="(.+?)"  class="normal"  target="_self" ><span>(.+?)</span>').findall(html)
     for fm_url,name in match:
             addDir(name,url + fm_url,5,"")
@@ -87,9 +76,7 @@ def get_radio_links(html):
 
 # Scans the main FM page looking for stations that are available
 def AUDIOLINKS(url, name):
-
     html = make_http_get(url)
-    
     match = get_radio_links(html)
     if (len(match) > 0):
         xbmc.Player().play(match[0], "")
@@ -106,23 +93,18 @@ def clear_htmltags(name):
 
 # Lists the new episodes of TV series
 def INDEX(url):
-    GA("None", "Latest_Videos")
-
     html = make_http_get(url)
-    
     match=re.compile('<div><font size="2">(.+?)<a href="(.+?)".+?Click').findall(html)
     image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     for name,url in match:
         name = clear_htmltags(name).encode("utf-8")
         image_name = name[:4]
         image_url = image_base_url + image_name + '.jpg'
-        #print image_url
         addDir(name,url,2,image_url)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 # Show the list of live tv 
 def SHOWLIVETVLIST(url):
-    GA("None", "TV")
     openfile = open(url, 'r')
     result = openfile.read()
     openfile.close()
@@ -136,7 +118,6 @@ def SHOWLIVETVLIST(url):
     return
 
 def get_dailymotion_link(html):
-    print "Scraping Dailymotion link"
     match=re.compile('"(http://www.dailymotion.com/video/.+?)"').findall(html)
     if (len(match) == 0):
         print "Dailymotion doing alternate scraping"
@@ -148,7 +129,6 @@ def get_dailymotion_link(html):
     return match
 
 def get_youtube_link(html):
-    print "Scraping youtube link"
     match=re.compile('"http://www.youtube.com/v/(.+?)"').findall(html)
     if (len(match) == 0):
         match = re.compile('"http://www.youtube.com/embed/(.+?)"').findall(html)
@@ -156,15 +136,11 @@ def get_youtube_link(html):
     return ["http://www.youtube.com/watch?v="+a for a in match]
 
 def get_blip_tv_link(html):
-    print "Scraping blip tv link"
     match=re.compile('"(http://(www.)?blip.tv/play/.+?)"').findall(html)
     return [a for a,b in match]
     
 def VIDEOLINKS(url,name):
-    print "Getting video links"
-
-    html = make_http_get(url)
-    
+    html = make_http_get(url)    
     match = get_youtube_link(html)
     if (len(match) == 0):
         match = get_blip_tv_link(html)
@@ -184,8 +160,6 @@ def VIDEOLINKS(url,name):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def play_video(url):
-    GA("None", "Play")
-    log("Playing " + url)
     all_url = url.split()
     length = len(all_url)
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
@@ -210,8 +184,6 @@ def get_stream_url(url):
     return stream_url
     
 def get_homePageStuff(url):
-    GA("None", "HomePage")
-
     html = make_http_get(url)
     
     data = re.compile('<div id="bodyimg">((.|\n)+?)<!-- Fm Programs -->((.|\n)+?)<div id="Interview With Raju Lama">((.|\n)+?)<div id="Calender">').findall(html)
@@ -290,7 +262,6 @@ def addLink(name,url,iconimage):
 
 
 def addDir(name,url,mode,iconimage):
-    print name
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
     ok=True
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
@@ -298,94 +269,6 @@ def addDir(name,url,mode,iconimage):
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
-def log(message):
-    print "[CanadaNepal] " + message
-
-def send_request_to_google_analytics(utm_url):
-    ua='Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3'
-    import urllib2
-    try:
-        req = urllib2.Request(utm_url, None,
-                                    {'User-Agent':ua}
-                                     )
-        response = urllib2.urlopen(req).read()
-    except:
-        print ("GA fail: %s" % utm_url)         
-    return response
-  
-     
-def GA(group,name):
-    datapath = xbmc.translatePath(ADDON.getAddonInfo('profile'))
-    VISITOR = os.path.join(datapath, 'visitor')
-    if os.path.exists(VISITOR):
-        VISITOR = open(VISITOR).read()
-    else:
-        if not os.path.isdir(datapath):
-            try:
-                os.makedirs(datapath)
-            except IOError, e:
-                print "Unable to create addon folder."
-                return 
-
-        from random import randint
-        txtfile = open(VISITOR,"w") 
-        txtfile.write(str(randint(0, 0x7fffffff)))
-        txtfile.close()
-        VISITOR = open(VISITOR).read()
-    try:
-        try:
-            from hashlib import md5
-        except:
-            from md5 import md5
-        from random import randint
-        import time
-        from urllib import unquote, quote
-        from os import environ
-        from hashlib import sha1
-        VERSION = "4.2.8"
-        UATRACK = "UA-38330258-1"
-        PROPERTY_ID = environ.get("GA_PROPERTY_ID", UATRACK)
-        PATH = "CanadaNepal"            
-        utm_gif_location = "http://www.google-analytics.com/__utm.gif"
-        if name=="None":
-                utm_url = utm_gif_location + "?" + \
-                        "utmwv=" + VERSION + \
-                        "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                        "&utmp=" + quote(PATH) + \
-                        "&utmac=" + PROPERTY_ID + \
-                        "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
-        else:
-            if group=="None":
-                   utm_url = utm_gif_location + "?" + \
-                            "utmwv=" + VERSION + \
-                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                            "&utmp=" + quote(PATH+"/"+name) + \
-                            "&utmac=" + PROPERTY_ID + \
-                            "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
-            else:
-                   utm_url = utm_gif_location + "?" + \
-                            "utmwv=" + VERSION + \
-                            "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                            "&utmp=" + quote(PATH+"/"+group+"/"+name) + \
-                            "&utmac=" + PROPERTY_ID + \
-                            "&utmcc=__utma=%s" % ".".join(["1", "1", VISITOR, "1", "1","2"])
-        if not group=="None":
-                utm_track = utm_gif_location + "?" + \
-                        "utmwv=" + VERSION + \
-                        "&utmn=" + str(randint(0, 0x7fffffff)) + \
-                        "&utmp=" + quote(PATH) + \
-                        "&utmt=" + "events" + \
-                        "&utme="+ quote("5("+PATH+"*"+group+"*"+name+")")+\
-                        "&utmac=" + PROPERTY_ID + \
-                        "&utmcc=__utma=%s" % ".".join(["1", "1", "1", VISITOR,"1","2"])
-
-        print "Analitycs: %s" % utm_url
-        send_request_to_google_analytics(utm_url)
-        print "Analitycs: %s" % utm_track
-        send_request_to_google_analytics(utm_track)
-    except:
-        print "================  CANNOT POST TO ANALYTICS  ================"
-              
 params=get_params()
 url=None
 name=None

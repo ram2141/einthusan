@@ -195,7 +195,6 @@ def get_homePageStuffHelper(data):
     match = re.compile('.+?<a href="(.+?.html).+?".+?>(.+?)</a>(.+)').findall(data)
     length = len(match) - 1
     i = 0
-    log(str(length))
     while (i < length):
         currentMatch = match[i]
         nextMatch = match[i+1]

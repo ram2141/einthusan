@@ -62,7 +62,7 @@ def login_to_website():
 ##
 # Prints the main categories. Called when id is 0.
 ##
-def CATEGORIES():
+def main_categories(name, url, language, mode):
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/' 
 
@@ -77,7 +77,7 @@ def CATEGORIES():
 ##
 # Shows categories for each language
 ##
-def inner_categories(language, bluray=False): 
+def inner_categories(name, url, language, mode, bluray=False): 
 
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/' 
@@ -102,24 +102,20 @@ def inner_categories(language, bluray=False):
 ##
 #  Displays the categories for Blu-Ray
 #
-def display_BluRay_listings(language):
+def display_BluRay_listings(name, url, language, mode):
     inner_categories(language, True)
-
 
 ##
 #  Scrapes a list of movies from the website. Called when mode is 1.
 ##
-def INDEX(url):
-    print "Getting video links"
+def get_movies(name, url, language, mode):
     html =  http_get(url)
-    
     match = re.compile('<div class="video-object-thumb"><a href="(.+?)">.+?<a class="movie-cover-wrapper".+?><img src="(.+?)" alt="(.+?)"').findall(html)
 
     # Bit of a hack
     MOVIES_URL = "http://www.einthusan.com/movies/"
     for page_link, image, name in match:
         addDir(name, MOVIES_URL + page_link, 2, MOVIES_URL + image)
-
 
     numerical_nav = re.compile('<div class="numerical-nav">(.+?)</div>').findall(html)
 
@@ -134,7 +130,7 @@ def INDEX(url):
 #  Just displays the two recent sections. Called when id is 3.
 #
 ##
-def show_recent_sections(url, language):
+def show_recent_sections(name, url, language, mode):
     INDEX_URL = url + 'index.php?organize=Activity&org_type=Activity&page=1&lang='+language
 
     addDir('Recently Posted', INDEX_URL + '&filtered=RecentlyPosted', 1, '', '')
@@ -145,7 +141,7 @@ def show_recent_sections(url, language):
 # Shows the sections for Top Viewed. Called when id is 4.
 #
 ##
-def show_top_viewed_options(url, language):
+def show_top_viewed_options(name, url, language, mode):
     INDEX_URL = url + 'index.php?organize=Statistics&org_type=Statistics&page=1&lang='+language
 
     addDir('All Time', INDEX_URL + '&filtered=AllTimeViews' , 1, '', '')
@@ -159,9 +155,8 @@ def show_top_viewed_options(url, language):
 
 ##
 # Displays the options for Top Rated. Called when id is 5.
-#
 ##
-def show_top_rated_options(url, language):
+def show_top_rated_options(name, url, language, mode):
     INDEX_URL = url + 'index.php?organize=Rating&org_type=Rating&page=1&lang=' + language
 
     addDir('Romance', INDEX_URL + '&filtered=Romance', 1, '')
@@ -175,7 +170,7 @@ def show_top_rated_options(url, language):
 ##
 # Displays the options for A-Z view. Called when id is 8.
 ##
-def show_A_Z(url, language):
+def show_A_Z(name, url, language, mode):
     azlist = map (chr, range(65,91))
 
     INDEX_URL = url + 'index.php?organize=Alphabetical&org_type=Alphabetical&lang='+language
@@ -194,7 +189,7 @@ def show_A_Z(url, language):
 # 10: List of Actors
 # 11: List of directors
 ## 
-def show_list(b_url, language, mode):
+def show_list(name, b_url, language, mode):
 
     url = b_url + 'index.php?organize=Director'
     if (mode == 9):
@@ -220,7 +215,7 @@ def show_list(b_url, language, mode):
 ##
 # Shows the search box for serching. Shown when the id is 6.
 ##
-def show_search_box(language):
+def show_search_box(name, url, language, mode):
     search_term = GUIEditExportName("")
 
     search_url = 'http://www.einthusan.com/search/?search_query=' + search_term + "&lang=" + language
@@ -277,7 +272,7 @@ def GUIEditExportName(name):
 # Plays the video. Called when the id is 2.
 #
 ##
-def play_video(url,name):
+def play_video(name, url, language, mode):
     print "Playing URL : " + url
     html =  http_get(url, True)
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
@@ -303,7 +298,7 @@ def play_video(url,name):
 ##
 # Displays the setting view. Called when mode is 12
 ##
-def display_setting():
+def display_setting(name, url, language, mode):
     ADDON.openSettings()
 
 def get_params():
@@ -324,7 +319,6 @@ def get_params():
     return param
 
 def addLink(name,url,iconimage):
-    ok=True
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=url,listitem=liz)
@@ -333,7 +327,6 @@ def addLink(name,url,iconimage):
 
 def addDir(name,url,mode,iconimage, lang=''):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&lang="+str(lang)
-    ok=True
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
@@ -344,20 +337,23 @@ url=None
 name=None
 mode=None
 language=None
-quality=None
 
 try:
     url=urllib.unquote_plus(params["url"])
 except:
     pass
+
 try:
     name=urllib.unquote_plus(params["name"])
 except:
     pass
+
 try:
     mode=int(params["mode"])
 except:
+    mode=0
     pass
+
 try:
     language=urllib.unquote_plus(params["lang"])
 except:
@@ -379,27 +375,20 @@ except:
 # 11: Director view
 # 12: Show Addon Settings
 
-if mode==None: # or url==None or len(url)<1:
-    CATEGORIES()
-elif mode==1:
-    INDEX(url)
-elif mode==2:
-    play_video(url,name)
-elif mode==3:
-    show_recent_sections(url, language)
-elif mode==4:
-    show_top_viewed_options(url, language)
-elif mode==5:
-    show_top_rated_options(url, language)
-elif mode==6:
-    show_search_box(language)
-elif mode==7:
-    inner_categories(language) 
-elif mode==8:
-    show_A_Z(url, language)
-elif mode in [9,10,11]:
-    show_list(url, language, mode)
-elif mode==12:
-    display_setting()
-elif mode==13:
-    display_BluRay_listings(language)
+function_map = {}
+function_map[0] = main_categories
+function_map[1] = get_movies
+function_map[2] = play_video
+function_map[3] = show_recent_sections
+function_map[4] = show_top_viewed_options
+function_map[5] = show_top_rated_options
+function_map[6] = show_search_box
+function_map[7] = inner_categories
+function_map[8] = show_A_Z
+function_map[9] = show_list
+function_map[10] = show_list
+function_map[11] = show_list
+function_map[12] = display_setting
+function_map[13] = display_BluRay_listings
+
+function_map[mode](name, url, language, mode)

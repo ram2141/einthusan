@@ -103,7 +103,7 @@ def inner_categories(name, url, language, mode, bluray=False):
 #  Displays the categories for Blu-Ray
 #
 def display_BluRay_listings(name, url, language, mode):
-    inner_categories(language, True)
+    inner_categories(name, url, language, mode, True)
 
 ##
 #  Scrapes a list of movies from the website. Called when mode is 1.
@@ -335,7 +335,7 @@ def addDir(name,url,mode,iconimage, lang=''):
 params=get_params()
 url=None
 name=None
-mode=None
+mode=0
 language=None
 
 try:
@@ -351,7 +351,6 @@ except:
 try:
     mode=int(params["mode"])
 except:
-    mode=0
     pass
 
 try:

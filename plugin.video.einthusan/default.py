@@ -2,27 +2,36 @@
 
 import os
 import re
-import urllib
+import urllib, urllib2
 import xbmcplugin
 import xbmcgui
 import xbmcaddon
 from t0mm0.common.net import Net
 
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
-NAME = 'Einthusan'
-
-ADDON_PATH = ADDON.getAddonInfo("path");
 
 def http_get(url, login=False):
-    cookie_file = create_cookie_file()
+    # Dont need cookies right now..
+    #cookie_file = create_cookie_file()
+    net = Net()
     if login:
-        login_to_website()
-    net = Net(cookie_file)
+        login_url = "http://www.einthusan.com/etc/login.php"
+
+        username = xbmcplugin.getSetting(int(sys.argv[1]), 'username')
+        password = xbmcplugin.getSetting(int(sys.argv[1]), 'password')
+
+        if (username != '' and password != ''):
+            form_data = {}
+            form_data['username'] = username
+            form_data['password'] = password
+            try:
+                net.http_POST(login_url, form_data)
+            except urllib2.URLError, e:
+                xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Unable to login to website', '', '') 
     try:
-        html = net.http_GET(url).content
-        return html
-    except:
-        xbmcgui.Dialog().ok(NAME, 'Unable to connect to website', '', '') 
+        return net.http_GET(url).content
+    except urllib2.URLError, e:
+        xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Unable to connect to website', '', '') 
         return ""
 
 
@@ -38,32 +47,10 @@ def create_cookie_file():
         return cookie_file
 
 ##
-# Logs into the website
-##
-def login_to_website():
-    login_url = "http://www.einthusan.com/etc/login.php"
-
-    username = xbmcplugin.getSetting(int(sys.argv[1]), 'username')
-    password = xbmcplugin.getSetting(int(sys.argv[1]), 'password')
-
-    if (username == '' or password == ''):
-        return False
-    form_data = {}
-    form_data['username'] = username
-    form_data['password'] = password
-
-    cookie_file = create_cookie_file()
-    net = Net(cookie_file)
-    try:
-        net.http_POST(login_url, form_data)
-    except:
-        xbmcgui.Dialog().ok(NAME, 'Unable to login to website', '', '') 
-
-##
 # Prints the main categories. Called when id is 0.
 ##
 def main_categories(name, url, language, mode):
-    cwd = xbmcaddon.Addon().getAddonInfo('path')
+    cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/' 
 
     addDir('Hindi', '', 7, img_path + '/Hindi_Movies.png', 'hindi')
@@ -79,7 +66,7 @@ def main_categories(name, url, language, mode):
 ##
 def inner_categories(name, url, language, mode, bluray=False): 
 
-    cwd = xbmcaddon.Addon().getAddonInfo('path')
+    cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/' 
 
     base_url = 'http://www.einthusan.com/movies/'
@@ -232,8 +219,56 @@ def show_search_box(name, url, language, mode):
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
+##
+# Plays the video. Called when the id is 2.
+#
+##
+def play_video(name, url, language, mode):
+    print "Playing URL : " + url
+    html =  http_get(url, True)
+    match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
 
-#Function from xbmc.org forum. This is used to pop-up a virtual keyboard.
+    if (len(match) == 0):
+        match = re.compile("'file': '(.+?)'").findall(html)
+
+    thumbnail_match = re.compile('<img src="(../images.+?)"').findall(html)
+
+    # Bit of a hack again
+    MOVIES_URL = "http://www.einthusan.com/movies/"
+
+    playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
+    playlist.clear()
+    for stream_link in match:
+        listitem = xbmcgui.ListItem(name)
+        if (len(thumbnail_match) > 0):
+            listitem.setThumbnailImage(MOVIES_URL+thumbnail_match[0])
+        playlist.add(urllib.unquote(stream_link), listitem)
+    player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+    player.play(playlist)
+
+##
+# Displays the setting view. Called when mode is 12
+##
+def display_setting(name, url, language, mode):
+    ADDON.openSettings()
+
+def get_params():
+    param=[]
+    paramstring=sys.argv[2]
+    if len(paramstring)>=2:
+        params=sys.argv[2]
+        cleanedparams=params.replace('?','')
+        if (params[len(params)-1]=='/'):
+            params=params[0:len(params)-2]
+        pairsofparams=cleanedparams.split('&')
+        param={}
+        for i in range(len(pairsofparams)):
+            splitparams={}
+            splitparams=pairsofparams[i].split('=')
+            if (len(splitparams))==2:
+                param[splitparams[0]]=splitparams[1]
+    return param
+
 #########################################################
 # Function  : GUIEditExportName                         #
 #########################################################
@@ -265,58 +300,6 @@ def GUIEditExportName(name):
           else:
               GUIInfo(2,__language__(33225)) 
     return(name)
-   
-#########################################################
-
-##
-# Plays the video. Called when the id is 2.
-#
-##
-def play_video(name, url, language, mode):
-    print "Playing URL : " + url
-    html =  http_get(url, True)
-    match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
-
-    if (len(match) == 0):
-        match = re.compile("'file': '(.+?)'").findall(html)
-
-    thumbnail_match = re.compile('<img src="(../images.+?)"').findall(html)
-
-    # Bit of a hack again
-    MOVIES_URL = "http://www.einthusan.com/movies/"
-
-    playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-    playlist.clear()
-    for stream_link in match:
-        listitem = xbmcgui.ListItem(name)
-        if (len(thumbnail_match) > 0):
-            listitem.setThumbnailImage(MOVIES_URL+thumbnail_match[0])
-        playlist.add(stream_link, listitem)
-    player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
-    player.play(playlist)
-
-##
-# Displays the setting view. Called when mode is 12
-##
-def display_setting(name, url, language, mode):
-    ADDON.openSettings()
-
-def get_params():
-    param=[]
-    paramstring=sys.argv[2]
-    if len(paramstring)>=2:
-        params=sys.argv[2]
-        cleanedparams=params.replace('?','')
-        if (params[len(params)-1]=='/'):
-            params=params[0:len(params)-2]
-        pairsofparams=cleanedparams.split('&')
-        param={}
-        for i in range(len(pairsofparams)):
-            splitparams={}
-            splitparams=pairsofparams[i].split('=')
-            if (len(splitparams))==2:
-                param[splitparams[0]]=splitparams[1]
-    return param
 
 def addLink(name,url,iconimage):
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
@@ -329,8 +312,11 @@ def addDir(name,url,mode,iconimage, lang=''):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&lang="+str(lang)
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
+    liz.setProperty('IsPlayable', 'true')
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
+
+
             
 params=get_params()
 url=None

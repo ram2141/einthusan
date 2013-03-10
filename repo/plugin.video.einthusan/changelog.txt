@@ -1,3 +1,6 @@
+[B]Version 0.5.0[/B] 
+- Added a music video section 
+
 [B]Version 0.4.0[/B] 
 - Added Blu-Ray section.
 - Allow user to login to play bluray movies.
@@ -5,6 +8,9 @@
 
 [B]Version 0.3.0[/B] 
 - Telugu and Malayalam sections added
+
+[B]Version 0.2.9[/B] 
+- Added Google Analytics
 
 [B]Version 0.2.5[/B] 
 - Added an actors and directors view section

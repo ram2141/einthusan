@@ -83,6 +83,7 @@ def inner_categories(name, url, language, mode, bluray=False):
     if not bluray:
         addDir('Blu-Ray', '', 13, img_path + '/Bluray.png', language)
         addDir('Search', '', 6, img_path + '/Search_by_title.png', language)
+        addDir('Music Video', '' , 14, '', language)
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -93,23 +94,25 @@ def display_BluRay_listings(name, url, language, mode):
     inner_categories(name, url, language, mode, True)
 
 ##
-#  Scrapes a list of movies from the website. Called when mode is 1.
+#  Scrapes a list of movies and music videos from the website. Called when mode is 1.
 ##
-def get_movies(name, url, language, mode):
+def get_movies_and_music_videos(name, url, language, mode):
     html =  http_get(url)
-    match = re.compile('<div class="video-object-thumb"><a href="(.+?)">.+?<a class="movie-cover-wrapper".+?><img src="(.+?)" alt="(.+?)"').findall(html)
+    match = re.compile('<div class="(video|music)-object-thumb"><a href="(.+?)">(.+?<a class="movie-cover-wrapper".+?>)?<img src="(.+?)" alt="(.+?)"').findall(html)
 
     # Bit of a hack
     MOVIES_URL = "http://www.einthusan.com/movies/"
-    for page_link, image, name in match:
-        addDir(name, MOVIES_URL + page_link, 2, MOVIES_URL + image)
+    for _, page_link, _, image, name in match:
+        if (mode == 1):
+            image = MOVIES_URL + image
+        addDir(name, MOVIES_URL + page_link, 2, image, image)
 
     numerical_nav = re.compile('<div class="numerical-nav">(.+?)</div>').findall(html)
 
     if (len(numerical_nav) > 0):
         next_page = re.compile('<a class="numerical-nav-selected" href=".+?">.+?</a><a href=".+?">(.+?)</a>').findall(numerical_nav[0])
         if (len(next_page) == 1):
-            addDir("Next >>", url + "&page=" + next_page[0], 1, "http://www.sahara.co.za/Images/next.jpg", '')
+            addDir("Next >>", url + "&page=" + next_page[0], mode, "http://www.sahara.co.za/Images/next.jpg", '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -220,29 +223,39 @@ def show_search_box(name, url, language, mode):
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
+#  Displays a list of music videos
+##
+def list_music_videos(name, url, language, mode):
+    if (url == ""):
+        url = 'http://www.einthusan.com/music/index.php?lang=' + language 
+    get_movies_and_music_videos(name, url, language, mode)
+##
 # Plays the video. Called when the id is 2.
 #
 ##
 def play_video(name, url, language, mode):
-    print "Playing URL : " + url
     html =  http_get(url, True)
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
 
     if (len(match) == 0):
         match = re.compile("'file': '(.+?)'").findall(html)
 
-    thumbnail_match = re.compile('<img src="(../images.+?)"').findall(html)
-
     # Bit of a hack again
     MOVIES_URL = "http://www.einthusan.com/movies/"
 
+    image_link = language
+    if (image_link == ""):
+        thumbnail_match = re.compile('<img src="(../images.+?)"').findall(html)
+        if (len (thumbnail_match) > 0):
+            image_link = MOVIES_URL + thumbnail_match[0]
+
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
-    for stream_link in match:
+    if (len (match) > 0):
         listitem = xbmcgui.ListItem(name)
-        if (len(thumbnail_match) > 0):
-            listitem.setThumbnailImage(MOVIES_URL+thumbnail_match[0])
-        playlist.add(urllib.unquote(stream_link), listitem)
+        if (image_link != ""):
+            listitem.setThumbnailImage(image_link)
+        playlist.add(urllib.unquote(match[0]), listitem)
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
     player.play(playlist)
 
@@ -308,8 +321,8 @@ def addLink(name,url,iconimage):
     return ok
 
 
-def addDir(name,url,mode,iconimage, lang=''):
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&lang="+str(lang)
+def addDir(name, url, mode, iconimage, lang=''):
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&lang="+urllib.quote_plus(lang)
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     liz.setProperty('IsPlayable', 'true')
@@ -362,7 +375,7 @@ except:
 
 function_map = {}
 function_map[0] = main_categories
-function_map[1] = get_movies
+function_map[1] = get_movies_and_music_videos
 function_map[2] = play_video
 function_map[3] = show_recent_sections
 function_map[4] = show_top_viewed_options
@@ -375,5 +388,6 @@ function_map[10] = show_list
 function_map[11] = show_list
 function_map[12] = display_setting
 function_map[13] = display_BluRay_listings
+function_map[14] = list_music_videos
 
 function_map[mode](name, url, language, mode)

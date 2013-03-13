@@ -226,7 +226,7 @@ def show_search_box(name, url, language, mode):
 #  Displays a list of music videos
 ##
 def list_music_videos(name, url, language, mode):
-    if (url == ""):
+    if (url == "" or url == None):
         url = 'http://www.einthusan.com/music/index.php?lang=' + language 
     get_movies_and_music_videos(name, url, language, mode)
 ##
@@ -256,8 +256,7 @@ def play_video(name, url, language, mode):
         if (image_link != ""):
             listitem.setThumbnailImage(image_link)
         playlist.add(urllib.unquote(match[0]), listitem)
-    player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
-    player.play(playlist)
+    xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(playlist)
 
 ##
 # Displays the setting view. Called when mode is 12

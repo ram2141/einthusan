@@ -9,9 +9,6 @@
 [B]Version 0.3.0[/B] 
 - Telugu and Malayalam sections added
 
-[B]Version 0.2.9[/B] 
-- Added Google Analytics
-
 [B]Version 0.2.5[/B] 
 - Added an actors and directors view section
 - Also fixed the pagination issue when displaying a list of movies

@@ -39,8 +39,8 @@ def main_categories(name, url):
     addDir('Hot TV Series', '', 7, '')
     addDir('Latest Updates TV Series', '', 8, '')
     addDir('New TV Episodes', '', 8, '')
-    addDir('Favourites', '', 8, '')
-    addDir('Search', '', 6, '')
+    #addDir('Favourites', '', 8, '')
+    #addDir('Search', '', 6, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -56,13 +56,12 @@ def a_z_view(name, url):
 def list_hot_TV_series (name, url):
     url = 'http://ustv.cc/episode/Arrow.htm'
     html = http_get(url)
-    matches = re.compile('<span class="jumu"><a title=".+?" href="(.+?)">(.+?)</a></span><span class="nabe">(.+?)</span>').findall(html)
+    matches = re.compile('<span class="jumu"><a title=".+?" href="(/episode/(.+?).htm)">(.+?)</a></span><span class="nabe">(.+?)</span>').findall(html)
 
     BASE_URL = "http://ustv.cc"
-    for link, name, clicks in matches:
-        addDir(name + " : " + clicks, BASE_URL + link, 1, '')    
+    for link, base_name, name, clicks in matches:
+        addDir(name + " : [COLOR red]" + clicks + " clicks [/COLOR]", BASE_URL + link, 1, get_icon_url(base_name))    
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
-
 
 ##
 # Shows a list of Tv series. Called when mode is 5.
@@ -75,11 +74,10 @@ def list_tv_series_list_aux(html):
     bulk = re.compile('<dl class="list_wut">((.|\n)+?)</dl>').findall(html)
 
     if (len(bulk) > 0):
-        matches = re.compile('title=".+?" href="(.+?)">(.+?)</a>').findall(bulk[len(bulk) - 1][0])
+        matches = re.compile('title=".+?" href="(/episode/(.+?).htm)">(.+?)</a>').findall(bulk[len(bulk) - 1][0])
         BASE_URL = "http://ustv.cc"
-        for link, name in matches:
-            addDir(name, BASE_URL + link, 1, '')
-
+        for link, base_name, name in matches:
+            addDir(name, BASE_URL + link, 1, get_icon_url(base_name))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))    
     else:
         # Display a dialog
@@ -135,13 +133,21 @@ def list_latest_update_tv_series(name, url):
     bulk = re.compile('<div class="hot_aes">' + name + '</div>((.|\n)+?)</ul>').findall(html)
 
     if (len(bulk) > 0):
-        matches = re.compile('<a title=".+? " href="(.+?)">(.+?)</a>').findall(bulk[0][0])
-
-        for link, name in matches:
-            addDir(name, BASE_URL + link, 1, '')
+        matches = re.compile('<a title=".+? " href="(/episode/(.+?).htm)">(.+?)</a>.+?color="#FF0000">(.+?)</font>').findall(bulk[0][0])
+        IMG_BASE = "http://d.ustv.cc/img/%s.jpg"
+        for link, base_name, name, ep in matches:
+            ep = ep.replace('&nbsp;','')
+            addDir(name + ":[COLOR red]" + ep +"[/COLOR]", BASE_URL + link, 1, get_icon_url(base_name))
         xbmcplugin.endOfDirectory(int(sys.argv[1]))    
     else:
         xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Cannot find TV series', '', '') 
+
+def get_icon_url(base_name):
+    IMG_BASE = "http://d.ustv.cc/img/%s.jpg"
+    if (base_name.count('-') > 1):
+        base_name = base_name.replace('-','.')
+    base_name = base_name.replace("\'","")
+    return IMG_BASE%base_name
 
 ##
 # Shows the search box for serching. Shown when the id is 6.
@@ -163,7 +169,11 @@ def show_search_box(name, url):
 ##
 def play_video(name, url):
     html =  http_get(url)
-    match = re.compile('".+?\?key=(.+?)"').findall(html)
+
+    print html
+    match = re.compile('[\'\"].+?\?key=(.+?)[\"\']').findall(html)
+
+    print match
 
     if (len (match) > 0):
         key = 'http://d.ustv.cc/ip.mp4?key=' + urllib.quote(match[0])

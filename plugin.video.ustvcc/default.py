@@ -7,6 +7,8 @@ import xbmcplugin
 import xbmcgui
 import xbmcaddon
 from t0mm0.common.net import Net
+from metahandler import metahandlers
+import json
 
 ADDON = xbmcaddon.Addon(id='plugin.video.ustvcc')
 
@@ -60,7 +62,7 @@ def list_hot_TV_series (name, url):
 
     BASE_URL = "http://ustv.cc"
     for link, base_name, name, clicks in matches:
-        addDir(name + " : [COLOR red]" + clicks + " clicks [/COLOR]", BASE_URL + link, 1, get_icon_url(base_name))    
+        addDir(name,  BASE_URL + link, 1, '', name + " : [COLOR red]" + clicks + " clicks [/COLOR]",)    
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
 
 ##
@@ -73,11 +75,23 @@ def list_tv_series_list(name, url):
 def list_tv_series_list_aux(html):
     bulk = re.compile('<dl class="list_wut">((.|\n)+?)</dl>').findall(html)
 
+
+
     if (len(bulk) > 0):
+
+        metahandle = metahandlers.MetaData()
+
         matches = re.compile('title=".+?" href="(/episode/(.+?).htm)">(.+?)</a>').findall(bulk[len(bulk) - 1][0])
         BASE_URL = "http://ustv.cc"
         for link, base_name, name in matches:
-            addDir(name, BASE_URL + link, 1, get_icon_url(base_name))
+
+            meta = metahandle.get_meta('tvshow', name)
+            #json.loads(str(cover))
+            #print json['episode']
+            cover = meta['cover_url']
+            print cover
+
+            addDir(name, BASE_URL + link, 1, cover)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))    
     else:
         # Display a dialog
@@ -91,12 +105,20 @@ def list_seasons(name, url):
     matches = re.compile(' <label  id=".+?".+?onclick="selecttab\(\'(.+?)\'\)" ').findall(html)
 
     img = re.compile('<img.+?src="(.+?)"').findall(html)
-    image = ''
     if (len(img) > 0):
         image = img[0]
+    image = ''
+
+
+    num = {1,2,3}
+
+    meta = metahandlers.MetaData()
+    #meta.update_meta('tvshow', name, '')
+    cover = meta.get_meta('tvshow', name)
+    print cover
 
     for season in matches:
-        addDir("Season " + season, url, 4, image)  
+        addDir(season, url, 4, image, "Season " + season)  
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
 
 # Lists all the episdoes in the given season.
@@ -137,17 +159,10 @@ def list_latest_update_tv_series(name, url):
         IMG_BASE = "http://d.ustv.cc/img/%s.jpg"
         for link, base_name, name, ep in matches:
             ep = ep.replace('&nbsp;','')
-            addDir(name + ":[COLOR red]" + ep +"[/COLOR]", BASE_URL + link, 1, get_icon_url(base_name))
+            addDir(name, BASE_URL + link, 1, '', name + ":[COLOR red]" + ep +"[/COLOR]")
         xbmcplugin.endOfDirectory(int(sys.argv[1]))    
     else:
         xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Cannot find TV series', '', '') 
-
-def get_icon_url(base_name):
-    IMG_BASE = "http://d.ustv.cc/img/%s.jpg"
-    if (base_name.count('-') > 1):
-        base_name = base_name.replace('-','.')
-    base_name = base_name.replace("\'","")
-    return IMG_BASE%base_name
 
 ##
 # Shows the search box for serching. Shown when the id is 6.
@@ -185,8 +200,6 @@ def play_video(name, url):
         xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(playlist)
     else:
         xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Cannot find a video stream', '', '') 
-
-
 ##
 # Displays the setting view. Called when mode is 12
 ##
@@ -246,10 +259,12 @@ def addLink(name,url,iconimage):
     return ok
 
 
-def addDir(name, url, mode, iconimage):
+def addDir(name, url, mode, iconimage, displayName=''):
+    if (displayName == ''):
+        displayName = name
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
-    liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-    liz.setInfo( type="Video", infoLabels={ "Title": name } )
+    liz=xbmcgui.ListItem(displayName, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
+    liz.setInfo( type="Video", infoLabels={ "Title": displayName } )
     liz.setProperty('IsPlayable', 'true')
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok

@@ -14,7 +14,7 @@ elif [ $1 = "Repo" ]; then
     rm -f repo/repository.humla/*.zip
     zip -r repo/repository.humla/repository.humla-$2.zip repository.humla/
     cp repository.humla/changelog.txt repo/repository.humla/
-elif [ $1 = "Ustv" ]; then
+elif [ $1 = "Ustvcc" ]; then
     rm -f repo/plugin.video.ustvcc/*.zip
     zip -r repo/plugin.video.ustvcc/plugin.video.ustvcc-$2.zip plugin.video.ustvcc/
     cp plugin.video.ustvcc/changelog.txt repo/plugin.video.ustvcc/

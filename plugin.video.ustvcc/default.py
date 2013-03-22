@@ -1,4 +1,4 @@
-# Einthusan.com plugin written by humla.
+# Ustv.cc plugin written by humla.
 
 import os
 import re
@@ -8,7 +8,6 @@ import xbmcgui
 import xbmcaddon
 from t0mm0.common.net import Net
 from metahandler import metahandlers
-import json
 
 ADDON = xbmcaddon.Addon(id='plugin.video.ustvcc')
 
@@ -102,8 +101,6 @@ def list_tv_series_list_aux(html):
         for link, base_name, name in matches:
 
             meta = metahandle.get_meta('tvshow', name)
-            #json.loads(str(cover))
-            #print json['episode']
             cover = meta['cover_url']
             print cover
 
@@ -124,7 +121,6 @@ def list_seasons(name, url):
     if (len(img) > 0):
         image = img[0]
     image = ''
-
 
     num = {1,2,3}
 

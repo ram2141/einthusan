@@ -12,8 +12,13 @@ import json
 
 ADDON = xbmcaddon.Addon(id='plugin.video.ustvcc')
 
+def get_net():
+    user_agent = "Mozilla/5.0 (X11; U; GNU Hurd; C -) AppleWebKit/527+ (KHTML, like Gecko, Safari/419.3) Arora/0.10.1"
+    return Net(user_agent=user_agent)
+
+# Mozilla/5.0 (X11; U; GNU Hurd; C -) AppleWebKit/527+ (KHTML, like Gecko, Safari/419.3) Arora/0.10.1 
 def http_get(url):
-    net = Net()
+    net = get_net()
     try:
         return net.http_GET(url).content.encode("utf-8")
     except urllib2.URLError, e:
@@ -21,12 +26,25 @@ def http_get(url):
         return ""
 
 def http_post(url, post_data):
-    net = Net()
+    net = get_net()
     try:
         return net.http_POST(url, post_data).content.encode("utf-8")
     except urllib2.URLError, e:
         xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Unable to connect to website', '', '') 
-        return ""   
+        return ""  
+
+## Not used..
+def create_cookie_file():
+    ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+    cookie_file = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
+    print cookie_file
+    if not os.path.exists(ADDON_USERDATA_FOLDER):
+        print "Creating addon directory in userdata/addon_data"
+        os.makedirs(ADDON_USERDATA_FOLDER)
+    if not os.path.exists(cookie_file):
+        print "Creating the cookie file"
+        open(cookie_file,'w').close()
+    return cookie_file
 
 ##
 # Prints the main categories. Called when id is 0.
@@ -74,8 +92,6 @@ def list_tv_series_list(name, url):
 
 def list_tv_series_list_aux(html):
     bulk = re.compile('<dl class="list_wut">((.|\n)+?)</dl>').findall(html)
-
-
 
     if (len(bulk) > 0):
 
@@ -125,8 +141,7 @@ def list_seasons(name, url):
 # Called when mode is 4
 #
 def list_episodes_in_season(name, url):
-    season_number = name.split(' ', 1)[1]
-    tab = "stab" + season_number
+    tab = "stab" + name
 
     html = http_get(url)
     compile_string = '<ul class="ju_list" id="' + tab + '"((.|\\n)+?)</ul>'
@@ -140,8 +155,8 @@ def list_episodes_in_season(name, url):
 
         matches = re.compile('<a href="(.+?)">(.+?)</a>').findall(bulk[0][0])
         BASE_URL = "http://www.ustv.cc"
-        for link, name in matches:
-            addDir(name, BASE_URL + link, 2, image)
+        for link, e_name in matches:
+            addDir(e_name, BASE_URL + link, 2, image)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))    
     else:
         xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Cant find any episodes', '', '') 
@@ -183,16 +198,18 @@ def show_search_box(name, url):
 #
 ##
 def play_video(name, url):
+    login_url = "http://ustv.cc/login.php"
+    params = {}
+    params['username'] = 'hello_how'
+    params['password'] = 'hello_how'
+    params['joinus'] = '1'
+    params['submit'] = ' Sign in '
+    http_post(login_url, params)
+
     html =  http_get(url)
-
-    print html
     match = re.compile('[\'\"].+?\?key=(.+?)[\"\']').findall(html)
-
-    print match
-
     if (len (match) > 0):
         key = 'http://d.ustv.cc/ip.mp4?key=' + urllib.quote(match[0])
-
         playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
         playlist.clear()
         listitem = xbmcgui.ListItem(name)

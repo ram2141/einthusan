@@ -124,12 +124,6 @@ def list_seasons(name, url, db_id):
     html = http_get(url)
     matches = re.compile(' <label  id=".+?".+?onclick="selecttab\(\'(.+?)\'\)" ').findall(html)
 
-    img = re.compile('<img.+?src="(.+?)"').findall(html)
-    if (len(img) > 0):
-        image = img[0]
-    image = ''
-
-    print "DB id is :" db_id
     metahandler = metahandlers.MetaData()
     seasons_data = metahandler.get_seasons(name, db_id, matches, overlay=6)
 
@@ -137,7 +131,7 @@ def list_seasons(name, url, db_id):
     for season in matches:
         season_data = seasons_data[i]
         cover = season_data['cover_url']
-        addDir(season, url, 4, cover, "Season " + season, meta=season_data)  
+        addDir(season, url, 4, cover, "Season " + season, meta=season_data, db_id=db_id)  
         i = i + 1
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
 
@@ -147,20 +141,20 @@ def list_seasons(name, url, db_id):
 def list_episodes_in_season(name, url, db_id):
     tab = "stab" + name
 
+    print "DB id is " + db_id
+
     html = http_get(url)
     compile_string = '<ul class="ju_list" id="' + tab + '"((.|\\n)+?)</ul>'
     bulk = re.compile(compile_string).findall(html)
 
     if (len(bulk) > 0):
-        img = re.compile('<img.+?src="(.+?)"').findall(html)
-        image = ''
-        if (len(img) > 0):
-            image = img[0]
-
         matches = re.compile('<a href="(.+?)">(.+?)</a>').findall(bulk[0][0])
         BASE_URL = "http://www.ustv.cc"
+        metahandle = metahandlers.MetaData()
         for link, e_name in matches:
-            addDir(e_name, BASE_URL + link, 2, image)
+            ep_number = e_name.split(' ')[0]
+            meta = metahandle.get_episode_meta(e_name,db_id,name,ep_number)
+            addDir(e_name, BASE_URL + link, 2, meta['cover_url'], db_id=db_id, meta=meta)
         xbmcplugin.endOfDirectory(int(sys.argv[1]))    
     else:
         xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Cant find any episodes', '', '') 
@@ -315,7 +309,7 @@ except:
     pass
 
 try:
-    name=urllib.unquote_plus(params["dbid"])
+    db_id=urllib.unquote_plus(params["dbid"])
 except:
     pass
 

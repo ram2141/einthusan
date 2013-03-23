@@ -1,2 +1,5 @@
-[B]Version 0.0.1[/B]
+[B]Version 0.1.x[/B]
+- Integrated the plugin with metahandlers
+
+[B]Version 0.0.x[/B]
 - Initial version of plugin

@@ -1,5 +1,6 @@
 [B]Version 0.1.x[/B]
 - Integrated the plugin with metahandlers
+- Added progress bars to show current operation
 
 [B]Version 0.0.x[/B]
 - Initial version of plugin

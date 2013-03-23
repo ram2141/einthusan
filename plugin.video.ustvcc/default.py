@@ -48,7 +48,7 @@ def create_cookie_file():
 ##
 # Prints the main categories. Called when id is 0.
 ##
-def main_categories(name, url):
+def main_categories(name, url, db_id):
     cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/' 
 
@@ -63,7 +63,7 @@ def main_categories(name, url):
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-def a_z_view(name, url):
+def a_z_view(name, url, db_id):
     azlist = map (chr, range(97,122))
 
     addDir('Numerical', url + 'num.htm', 5, '')
@@ -72,7 +72,7 @@ def a_z_view(name, url):
         addDir(letter, url + letter + '.htm', 5, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))   
 
-def list_hot_TV_series (name, url):
+def list_hot_TV_series (name, url, db_id):
     url = 'http://ustv.cc/episode/Arrow.htm'
     html = http_get(url)
     matches = re.compile('<span class="jumu"><a title=".+?" href="(/episode/(.+?).htm)">(.+?)</a></span><span class="nabe">(.+?)</span>').findall(html)
@@ -82,7 +82,9 @@ def list_hot_TV_series (name, url):
     for link, base_name, name, clicks in matches:
         meta = get_meta_tv_show(metahandle, name)
         cover = meta['banner_url']
-        addDir(name,  BASE_URL + link, 1, cover, name + " : [COLOR red]" + clicks + " clicks [/COLOR]", meta=meta)  
+        print meta
+        displayName = name + " : [COLOR red]" + clicks + " clicks [/COLOR]"
+        addDir(name,  BASE_URL + link, 1, cover, displayName=displayName , meta=meta, db_id=meta['imdb_id'])  
     xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
     xbmc.executebuiltin("Container.SetViewMode(503)")  
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -93,7 +95,7 @@ def get_meta_tv_show(metahandle, name):
 ##
 # Shows a list of Tv series. Called when mode is 5.
 ##
-def list_tv_series_list(name, url):
+def list_tv_series_list(name, url, db_id):
     html = http_get(url)
     list_tv_series_list_aux(html)
 
@@ -106,7 +108,8 @@ def list_tv_series_list_aux(html):
         for link, base_name, name in matches:
             meta = get_meta_tv_show(metahandle, name) 
             cover = meta['banner_url']
-            addDir(name, BASE_URL + link, 1, cover, meta=meta)
+            print meta
+            addDir(name, BASE_URL + link, 1, cover, meta=meta, db_id=meta['imdb_db'])
         xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
         xbmc.executebuiltin("Container.SetViewMode(503)")
         xbmcplugin.endOfDirectory(int(sys.argv[1]))    
@@ -117,7 +120,7 @@ def list_tv_series_list_aux(html):
 #
 # List the seasons for a specific TV series. Called when mode is 1.
 #
-def list_seasons(name, url):
+def list_seasons(name, url, db_id):
     html = http_get(url)
     matches = re.compile(' <label  id=".+?".+?onclick="selecttab\(\'(.+?)\'\)" ').findall(html)
 
@@ -126,17 +129,14 @@ def list_seasons(name, url):
         image = img[0]
     image = ''
 
+    print "DB id is :" db_id
     metahandler = metahandlers.MetaData()
-    meta = get_meta_tv_show(metahandler, name)
-    db_id = meta['imdb_id']
-
     seasons_data = metahandler.get_seasons(name, db_id, matches, overlay=6)
 
     i = 0
     for season in matches:
         season_data = seasons_data[i]
         cover = season_data['cover_url']
-
         addDir(season, url, 4, cover, "Season " + season, meta=season_data)  
         i = i + 1
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
@@ -144,7 +144,7 @@ def list_seasons(name, url):
 # Lists all the episdoes in the given season.
 # Called when mode is 4
 #
-def list_episodes_in_season(name, url):
+def list_episodes_in_season(name, url, db_id):
     tab = "stab" + name
 
     html = http_get(url)
@@ -167,7 +167,7 @@ def list_episodes_in_season(name, url):
 
 # Displays the list of new tv series.
 # Called when mode is 8
-def list_latest_update_tv_series(name, url):
+def list_latest_update_tv_series(name, url, db_id):
     BASE_URL = "http://ustv.cc"
     html = http_get(BASE_URL)
 
@@ -186,7 +186,7 @@ def list_latest_update_tv_series(name, url):
 ##
 # Shows the search box for serching. Shown when the id is 6.
 ##
-def show_search_box(name, url):
+def show_search_box(name, url, db_id):
     search_term = urllib.quote_plus(GUIEditExportName(""))
     search_url = 'http://ustv.cc/s.php'
 
@@ -201,7 +201,7 @@ def show_search_box(name, url):
 # Plays the video. Called when the id is 2.
 #
 ##
-def play_video(name, url):
+def play_video(name, url, db_id):
     login_url = "http://ustv.cc/login.php"
     params = {}
     params['username'] = 'hello_how'
@@ -280,10 +280,10 @@ def addLink(name,url,iconimage):
     return ok
 
 
-def addDir(name, url, mode, iconimage, displayName='', meta = {}):
+def addDir(name, url, mode, iconimage, displayName='', meta = {}, db_id='',):
     if (displayName == ''):
         displayName = name
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
+    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&dbid="+urllib.quote_plus(db_id)
     liz=xbmcgui.ListItem(displayName, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
     meta["Title"] = displayName
     liz.setInfo( type="Video", infoLabels=meta )
@@ -297,6 +297,7 @@ params=get_params()
 url=None
 name=None
 mode=0
+db_id=''
 
 try:
     url=urllib.unquote_plus(params["url"])
@@ -310,6 +311,11 @@ except:
 
 try:
     mode=int(params["mode"])
+except:
+    pass
+
+try:
+    name=urllib.unquote_plus(params["dbid"])
 except:
     pass
 
@@ -342,4 +348,4 @@ function_map[8] = list_latest_update_tv_series
 
 
 
-function_map[mode](name, url)
+function_map[mode](name, url, db_id)

@@ -78,9 +78,17 @@ def list_hot_TV_series (name, url):
     matches = re.compile('<span class="jumu"><a title=".+?" href="(/episode/(.+?).htm)">(.+?)</a></span><span class="nabe">(.+?)</span>').findall(html)
 
     BASE_URL = "http://ustv.cc"
+    metahandle = metahandlers.MetaData()
     for link, base_name, name, clicks in matches:
-        addDir(name,  BASE_URL + link, 1, '', name + " : [COLOR red]" + clicks + " clicks [/COLOR]",)    
-    xbmcplugin.endOfDirectory(int(sys.argv[1]))    
+        meta = get_meta_tv_show(metahandle, name)
+        cover = meta['banner_url']
+        addDir(name,  BASE_URL + link, 1, cover, name + " : [COLOR red]" + clicks + " clicks [/COLOR]", meta=meta)  
+    xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
+    xbmc.executebuiltin("Container.SetViewMode(503)")  
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+def get_meta_tv_show(metahandle, name):
+    return metahandle.get_meta('tvshow', name)
 
 ##
 # Shows a list of Tv series. Called when mode is 5.
@@ -91,20 +99,16 @@ def list_tv_series_list(name, url):
 
 def list_tv_series_list_aux(html):
     bulk = re.compile('<dl class="list_wut">((.|\n)+?)</dl>').findall(html)
-
     if (len(bulk) > 0):
-
         metahandle = metahandlers.MetaData()
-
         matches = re.compile('title=".+?" href="(/episode/(.+?).htm)">(.+?)</a>').findall(bulk[len(bulk) - 1][0])
         BASE_URL = "http://ustv.cc"
         for link, base_name, name in matches:
-
-            meta = metahandle.get_meta('tvshow', name)
-            cover = meta['cover_url']
-            print cover
-
-            addDir(name, BASE_URL + link, 1, cover)
+            meta = get_meta_tv_show(metahandle, name) 
+            cover = meta['banner_url']
+            addDir(name, BASE_URL + link, 1, cover, meta=meta)
+        xbmcplugin.setContent(int(sys.argv[1]), 'tvshows')
+        xbmc.executebuiltin("Container.SetViewMode(503)")
         xbmcplugin.endOfDirectory(int(sys.argv[1]))    
     else:
         # Display a dialog
@@ -122,15 +126,19 @@ def list_seasons(name, url):
         image = img[0]
     image = ''
 
-    num = {1,2,3}
+    metahandler = metahandlers.MetaData()
+    meta = get_meta_tv_show(metahandler, name)
+    db_id = meta['imdb_id']
 
-    meta = metahandlers.MetaData()
-    #meta.update_meta('tvshow', name, '')
-    cover = meta.get_meta('tvshow', name)
-    print cover
+    seasons_data = metahandler.get_seasons(name, db_id, matches, overlay=6)
 
+    i = 0
     for season in matches:
-        addDir(season, url, 4, image, "Season " + season)  
+        season_data = seasons_data[i]
+        cover = season_data['cover_url']
+
+        addDir(season, url, 4, cover, "Season " + season, meta=season_data)  
+        i = i + 1
     xbmcplugin.endOfDirectory(int(sys.argv[1]))    
 
 # Lists all the episdoes in the given season.
@@ -272,12 +280,13 @@ def addLink(name,url,iconimage):
     return ok
 
 
-def addDir(name, url, mode, iconimage, displayName=''):
+def addDir(name, url, mode, iconimage, displayName='', meta = {}):
     if (displayName == ''):
         displayName = name
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)
     liz=xbmcgui.ListItem(displayName, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
-    liz.setInfo( type="Video", infoLabels={ "Title": displayName } )
+    meta["Title"] = displayName
+    liz.setInfo( type="Video", infoLabels=meta )
     liz.setProperty('IsPlayable', 'true')
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok

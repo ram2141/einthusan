@@ -60,8 +60,13 @@ def main_categories(name, url, db_id):
     addDir('New TV Episodes', '', 8, '')
     #addDir('Favourites', '', 8, '')
     #addDir('Search', '', 6, '')
-
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+## Context menu
+#listitem.addContextMenuItems(cm, replaceItems=True)
+#  runstring = 'RunPlugin(%s)' % addon.build_plugin_url({'mode':'SaveFav', 'section':section, 'title':title, 'url':BASE_URL+resurl, 'year':year})
+#           cm.append(('Add to Favorites', runstring,))
+##
 
 def a_z_view(name, url, db_id):
     azlist = map (chr, range(97,122))

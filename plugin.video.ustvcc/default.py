@@ -212,7 +212,7 @@ def list_episodes_in_season(name, url, db_id):
 
       for link, e_name in matches:
           ep_number = e_name.split(' ')[0]
-          meta = metahandle.get_episode_meta(e_name,db_id,name,ep_number)
+          meta = metahandle.get_episode_meta('', db_id, name, ep_number)
           addDir(e_name, BASE_URL + link, 2, meta['cover_url'], db_id=db_id, meta=meta)
           progressBarValue = progressBarValue + interval
           progressBar.update(progressBarValue)

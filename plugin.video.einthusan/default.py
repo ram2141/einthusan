@@ -78,7 +78,7 @@ def inner_categories(name, url, language, mode, bluray=False):
     addDir('Actors', base_url, 10,'', language)
     addDir('Director', base_url, 11,'', language)
     addDir('Recent', base_url, 3,'', language)
-    addDir('Top Viewed', base_url, 4,'', language)
+    #addDir('Top Viewed', base_url, 4,'', language)
     addDir('Top Rated', base_url, 5, '', language)
     if not bluray:
         addDir('Blu-Ray', '', 13, img_path + '/Bluray.png', language)
@@ -129,7 +129,7 @@ def show_recent_sections(name, url, language, mode):
 
 ##
 # Shows the sections for Top Viewed. Called when id is 4.
-#
+#  ******* The website has dropped this *******************
 ##
 def show_top_viewed_options(name, url, language, mode):
     INDEX_URL = url + 'index.php?organize=Statistics&org_type=Statistics&page=1&lang='+language

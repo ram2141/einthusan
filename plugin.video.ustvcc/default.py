@@ -48,7 +48,7 @@ def create_cookie_file():
 ##
 # Prints the main categories. Called when id is 0.
 ##
-def main_categories(name, url, db_id):
+def main_categories(name, url, db_id, series_name, season):
   cwd = ADDON.getAddonInfo('path')
   img_path = cwd + '/images/' 
 
@@ -69,7 +69,7 @@ def main_categories(name, url, db_id):
 #           cm.append(('Add to Favorites', runstring,))
 ##
 
-def a_z_view(name, url, db_id):
+def a_z_view(name, url, db_id, series_name, season):
   azlist = map (chr, range(97,122))
 
   addDir('Numerical', url + 'num.htm', 5, '')
@@ -78,7 +78,7 @@ def a_z_view(name, url, db_id):
       addDir(letter, url + letter + '.htm', 5, '', db_id=db_id)
   xbmcplugin.endOfDirectory(int(sys.argv[1]))   
 
-def list_hot_TV_series (name, url, db_id):
+def list_hot_TV_series (name, url, db_id, series_name, season):
   progressBar = xbmcgui.DialogProgress()
   progressBar.create(ADDON.getAddonInfo('name'), "Getting metadata")
   progressBarValue = 0
@@ -110,13 +110,13 @@ def get_meta_tv_show(metahandle, name):
 def add_tv_show_in_list(metahandle, link, name, displayName):
   meta = get_meta_tv_show(metahandle, name) 
   cover = meta['banner_url']
-  addDir(name, link, 1, cover, meta=meta, db_id=meta['imdb_id'], displayName=displayName)
+  addDir(name, link, 1, cover, meta=meta, db_id=meta['imdb_id'], displayName=displayName, series_name=name)
   return
 
 ##
 # Shows a list of Tv series. Called when mode is 5.
 ##
-def list_tv_series_list(name, url, db_id):
+def list_tv_series_list(name, url, db_id, series_name, season):
   html = http_get(url)
   list_tv_series_list_aux(html)
 
@@ -155,7 +155,7 @@ def list_tv_series_list_aux(html):
 #
 # List the seasons for a specific TV series. Called when mode is 1.
 #
-def list_seasons(name, url, db_id):
+def list_seasons(name, url, db_id, series_name, season):
   html = http_get(url)
 
   progressBar = xbmcgui.DialogProgress()
@@ -176,7 +176,7 @@ def list_seasons(name, url, db_id):
   for season in matches:
       season_data = seasons_data[i]
       cover = season_data['cover_url']
-      addDir(season, url, 4, cover, "Season " + season, meta=season_data, db_id=db_id)  
+      addDir(season, url, 4, cover, "Season " + season, meta=season_data, db_id=db_id, season=season, series_name=series_name)  
       i = i + 1
       progressBarValue = progressBarValue + interval
       progressBar.update(progressBarValue)
@@ -186,15 +186,13 @@ def list_seasons(name, url, db_id):
 # Lists all the episdoes in the given season.
 # Called when mode is 4
 #
-def list_episodes_in_season(name, url, db_id):
-  tab = "stab" + name
-
-  html = http_get(url)
-
+def list_episodes_in_season(name, url, db_id, series_name, season):
   progressBar = xbmcgui.DialogProgress()
   progressBar.create(ADDON.getAddonInfo('name'), "Getting metadata")
   progressBarValue = 0
 
+  tab = "stab" + name
+  html = http_get(url)
   compile_string = '<ul class="ju_list" id="' + tab + '"((.|\\n)+?)</ul>'
   bulk = re.compile(compile_string).findall(html)
 
@@ -205,15 +203,14 @@ def list_episodes_in_season(name, url, db_id):
       matches = re.compile('<a href="(.+?)">(.+?)</a>').findall(bulk[0][0])
       BASE_URL = "http://www.ustv.cc"
       metahandle = metahandlers.MetaData()
-
       progressBarValue = 20
       progressBar.update(progressBarValue)
       interval = 80 / len (matches)
 
       for link, e_name in matches:
-          ep_number = e_name.split(' ')[0]
+          ep_number = int(e_name.split(' ')[0])
           meta = metahandle.get_episode_meta('', db_id, name, ep_number)
-          addDir(e_name, BASE_URL + link, 2, meta['cover_url'], db_id=db_id, meta=meta)
+          addDir(e_name, BASE_URL + link, 2, meta['cover_url'], db_id=db_id, meta=meta, season=season, series_name=series_name)
           progressBarValue = progressBarValue + interval
           progressBar.update(progressBarValue)
       xbmcplugin.endOfDirectory(int(sys.argv[1]))    
@@ -222,7 +219,7 @@ def list_episodes_in_season(name, url, db_id):
 
 # Displays the list of new tv series.
 # Called when mode is 8
-def list_latest_update_tv_series(name, url, db_id):
+def list_latest_update_tv_series(name, url, db_id, series_name, season):
   BASE_URL = "http://ustv.cc"
   html = http_get(BASE_URL)
 
@@ -256,7 +253,7 @@ def list_latest_update_tv_series(name, url, db_id):
 ##
 # Shows the search box for serching. Shown when the id is 6.
 ##
-def show_search_box(name, url, db_id):
+def show_search_box(name, url, db_id, series_name, season):
   search_term = urllib.quote_plus(GUIEditExportName(""))
   search_url = 'http://ustv.cc/s.php'
 
@@ -270,7 +267,7 @@ def show_search_box(name, url, db_id):
 # Plays the video. Called when the id is 2.
 #
 ##
-def play_video(name, url, db_id):
+def play_video(name, url, db_id, series_name, season):
   login_url = "http://ustv.cc/login.php"
   params = {}
   params['username'] = 'hello_how'
@@ -281,19 +278,28 @@ def play_video(name, url, db_id):
 
   html =  http_get(url)
   match = re.compile('[\'\"].+?\?key=(.+?)[\"\']').findall(html)
+
+
   if (len (match) > 0):
+      
       key = 'http://d.ustv.cc/ip.mp4?key=' + urllib.quote(match[0])
       playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
       playlist.clear()
       listitem = xbmcgui.ListItem(name)
       playlist.add(key, listitem)
       xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(playlist)
+
+      ## Call metahandler and set viewed to true
+      ep_number = int(name.split(' ')[0])
+      metahandle = metahandlers.MetaData()
+      metahandle.change_watched(media_type='episode', name=name, imdb_id=db_id, season=season, episode=ep_number, watched=7)
   else:
       xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Cannot find a video stream', '', '') 
+
 ##
 # Displays the setting view. Called when mode is 12
 ##
-def display_setting(name, url, db_id):
+def display_setting(name, url, db_id, series_name, season):
   ADDON.openSettings()
 
 def get_params():
@@ -349,10 +355,10 @@ def addLink(name,url,iconimage):
   return ok
 
 
-def addDir(name, url, mode, iconimage, displayName='', meta = {}, db_id='',):
+def addDir(name, url, mode, iconimage, displayName='', meta = {}, db_id='', series_name='', season=''):
   if (displayName == ''):
     displayName = name
-  u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&dbid="+urllib.quote_plus(db_id)
+  u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&dbid="+urllib.quote_plus(db_id)+"&season="+urllib.quote_plus(season)+"&sn="+urllib.quote_plus(series_name)
   liz=xbmcgui.ListItem(displayName, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
   meta["Title"] = displayName
   liz.setInfo( type="Video", infoLabels=meta )
@@ -365,6 +371,8 @@ url=None
 name=None
 mode=0
 db_id=''
+series_name=''
+season=''
 
 try:
   url=urllib.unquote_plus(params["url"])
@@ -385,6 +393,17 @@ try:
   db_id=urllib.unquote_plus(params["dbid"])
 except:
   pass
+
+try:
+  season=urllib.unquote_plus(params["season"])
+except:
+  pass
+
+try:
+  series_name=urllib.unquote_plus(params["sn"])
+except:
+  pass
+
 
 
 # Modes
@@ -416,4 +435,4 @@ function_map[9] = display_setting
 
 
 
-function_map[mode](name, url, db_id)
+function_map[mode](name, url, db_id, series_name, season)

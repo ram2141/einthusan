@@ -78,9 +78,9 @@ def inner_categories(name, url, language, mode, bluray=False):
     addDir('Actors', base_url, 10,'', language)
     addDir('Director', base_url, 11,'', language)
     addDir('Recent', base_url, 3,'', language)
-    #addDir('Top Viewed', base_url, 4,'', language)
     addDir('Top Rated', base_url, 5, '', language)
     if not bluray:
+        addDir('Featured', '', 4,'', language)
         addDir('Blu-Ray', '', 13, img_path + '/Bluray.png', language)
         addDir('Search', '', 6, img_path + '/Search_by_title.png', language)
         addDir('Music Video', '' , 14, '', language)
@@ -142,6 +142,18 @@ def show_top_viewed_options(name, url, language, mode):
     addDir('This Year', INDEX_URL + '&filtered=ThisYearViews' , 1, '', '')
     addDir('Last Year', INDEX_URL + '&filtered=LastYearViews' , 1, '', '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
+# Shows the movie in the homepage..
+def show_featured_movies(name, url, language, mode):
+    page_url = 'http://www.einthusan.com/index.php?lang=' + language
+    html = http_get(page_url)
+    matches = re.compile('<a class="movie-cover-wrapper" href="(.+?)"><img src="(.+?)" alt="(.+?)" ').findall(html)
+
+    BASE_URL = 'http://www.einthusan.com/'
+    for link, image, name in matches:
+        addDir(name, BASE_URL + link, 2, BASE_URL + image, language)
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+
 
 ##
 # Displays the options for Top Rated. Called when id is 5.
@@ -377,7 +389,7 @@ function_map[0] = main_categories
 function_map[1] = get_movies_and_music_videos
 function_map[2] = play_video
 function_map[3] = show_recent_sections
-function_map[4] = show_top_viewed_options
+function_map[4] = show_featured_movies
 function_map[5] = show_top_rated_options
 function_map[6] = show_search_box
 function_map[7] = inner_categories

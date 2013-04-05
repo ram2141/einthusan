@@ -73,17 +73,17 @@ def inner_categories(name, url, language, mode, bluray=False):
     if bluray:
         base_url = 'http://www.einthusan.com/bluray/'
 
-    addDir('A-Z', base_url, 8, '', language)
-    addDir('Years', base_url, 9, '', language)
-    addDir('Actors', base_url, 10,'', language)
-    addDir('Director', base_url, 11,'', language)
-    addDir('Recent', base_url, 3,'', language)
-    addDir('Top Rated', base_url, 5, '', language)
+    addDir('A-Z', base_url, 8, img_path + 'a_z.png', language)
+    addDir('Years', base_url, 9, img_path + 'years.png', language)
+    addDir('Actors', base_url, 10, img_path + 'actors.png', language)
+    addDir('Director', base_url, 11, img_path + 'director.png', language)
+    addDir('Recent', base_url, 3, img_path + 'recent.png', language)
+    addDir('Top Rated', base_url, 5, img_path + 'top_rated.png', language)
     if not bluray:
-        addDir('Featured', '', 4,'', language)
+        addDir('Featured', '', 4, img_path + 'featured_videos.png', language)
         addDir('Blu-Ray', '', 13, img_path + '/Bluray.png', language)
         addDir('Search', '', 6, img_path + '/Search_by_title.png', language)
-        addDir('Music Video', '' , 14, '', language)
+        addDir('Music Video', '' , 14, img_path + 'music_videos.png', language)
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 

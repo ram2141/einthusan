@@ -6,45 +6,11 @@ import urllib, urllib2
 import xbmcplugin
 import xbmcgui
 import xbmcaddon
-from t0mm0.common.net import Net
+
+import HTTPInterface
+import JSONInterface
 
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
-
-def http_get(url, login=False):
-    # Dont need cookies right now..
-    #cookie_file = create_cookie_file()
-    net = Net()
-    if login:
-        login_url = "http://www.einthusan.com/etc/login.php"
-
-        username = xbmcplugin.getSetting(int(sys.argv[1]), 'username')
-        password = xbmcplugin.getSetting(int(sys.argv[1]), 'password')
-
-        if (username != '' and password != ''):
-            form_data = {}
-            form_data['username'] = username
-            form_data['password'] = password
-            try:
-                net.http_POST(login_url, form_data)
-            except urllib2.URLError, e:
-                xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Unable to login to website', '', '') 
-    try:
-        return net.http_GET(url).content
-    except urllib2.URLError, e:
-        xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Unable to connect to website', '', '') 
-        return ""
-
-
-def create_cookie_file():
-    try:
-        ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
-        cookie_file = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
-        if not os.path.exists(cookie_file):
-            print "Creating the cookie file"
-            open(cookie_file,'w').close()
-        return cookie_file
-    except:
-        return cookie_file
 
 ##
 # Prints the main categories. Called when id is 0.
@@ -58,6 +24,8 @@ def main_categories(name, url, language, mode):
     addDir('Telugu', '', 7, img_path + '/Telugu_Movies.png', 'telugu')
     addDir('Malayalam', '', 7, img_path + '/Malayalam_Movies.png', 'malayalam')
     addDir('Addon Settings', '', 12, '', '')
+
+    JSONInterface.get_list()
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -97,7 +65,7 @@ def display_BluRay_listings(name, url, language, mode):
 #  Scrapes a list of movies and music videos from the website. Called when mode is 1.
 ##
 def get_movies_and_music_videos(name, url, language, mode):
-    html =  http_get(url)
+    html =  HTTPInterface.http_get(url)
     match = re.compile('<div class="(video|music)-object-thumb"><a href="(.+?)">(.+?<a class="movie-cover-wrapper".+?>)?<img src="(.+?)" alt="(.+?)"').findall(html)
 
     # Bit of a hack
@@ -118,7 +86,6 @@ def get_movies_and_music_videos(name, url, language, mode):
 
 ##
 #  Just displays the two recent sections. Called when id is 3.
-#
 ##
 def show_recent_sections(name, url, language, mode):
     INDEX_URL = url + 'index.php?organize=Activity&org_type=Activity&page=1&lang='+language
@@ -146,14 +113,13 @@ def show_top_viewed_options(name, url, language, mode):
 # Shows the movie in the homepage..
 def show_featured_movies(name, url, language, mode):
     page_url = 'http://www.einthusan.com/index.php?lang=' + language
-    html = http_get(page_url)
+    html = HTTPInterface.http_get(page_url)
     matches = re.compile('<a class="movie-cover-wrapper" href="(.+?)"><img src="(.+?)" alt="(.+?)" ').findall(html)
 
     BASE_URL = 'http://www.einthusan.com/'
     for link, image, name in matches:
         addDir(name, BASE_URL + link, 2, BASE_URL + image, language)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
-
 
 ##
 # Displays the options for Top Rated. Called when id is 5.
@@ -167,7 +133,6 @@ def show_top_rated_options(name, url, language, mode):
     addDir('Storyline', INDEX_URL + '&filtered=Storyline', 1, '')
     addDir('Performance', INDEX_URL + '&filtered=Performance', 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
-
 
 ##
 # Displays the options for A-Z view. Called when id is 8.
@@ -202,7 +167,7 @@ def show_list(name, b_url, language, mode):
 
     BASE_URL = b_url + 'index.php'
     
-    html =  http_get(url)
+    html =  HTTPInterface.http_get(url)
 
     list_div = re.compile('<div class="video-organizer-element-wrapper">(.+?)</div>').findall(html)
 
@@ -222,7 +187,7 @@ def show_search_box(name, url, language, mode):
 
     search_url = 'http://www.einthusan.com/search/?search_query=' + search_term + "&lang=" + language
 
-    html =  http_get(search_url)
+    html =  HTTPInterface.http_get(search_url)
 
     match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(html)
 
@@ -241,12 +206,17 @@ def list_music_videos(name, url, language, mode):
     if (url == "" or url == None):
         url = 'http://www.einthusan.com/music/index.php?lang=' + language 
     get_movies_and_music_videos(name, url, language, mode)
+
+def http_request_with_login(url):
+    username = xbmcplugin.getSetting(int(sys.argv[1]), 'username')
+    password = xbmcplugin.getSetting(int(sys.argv[1]), 'password')
+    return HTTPInterface.http_get(url, username, password)
+
 ##
 # Plays the video. Called when the id is 2.
-#
 ##
 def play_video(name, url, language, mode):
-    html =  http_get(url, True)
+    html =  http_request_with_login(url)
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
 
     if (len(match) == 0):
@@ -340,8 +310,6 @@ def addDir(name, url, mode, iconimage, lang=''):
     ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
     return ok
 
-
-            
 params=get_params()
 url=None
 name=None
@@ -367,7 +335,6 @@ try:
     language=urllib.unquote_plus(params["lang"])
 except:
     pass
-
 
 # Modes
 # 0: The main Categories Menu. Selection of language

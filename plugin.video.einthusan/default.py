@@ -84,6 +84,20 @@ def get_movies_and_music_videos(name, url, language, mode):
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
+
+## http://www.einthusan.com/images/covers/
+def add_movies_to_list(movie_ids):
+    ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+    DB_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
+
+    print DB_FILE
+
+    for m_id in movie_ids:
+        _, name, image = DBInterface.get_cached_movie_details("", m_id)
+        if (movie_info == None):
+            _, name, image = JSONInterface.get_movie_detail(m_id)
+            DBInterface.save_move_details_to_cache(..., m_id, name, image)
+
 ##
 #  Just displays the two recent sections. Called when id is 3.
 ##
@@ -166,14 +180,11 @@ def show_list(name, b_url, language, mode):
     url = url + "&lang="+language
 
     BASE_URL = b_url + 'index.php'
-    
     html =  HTTPInterface.http_get(url)
-
     list_div = re.compile('<div class="video-organizer-element-wrapper">(.+?)</div>').findall(html)
 
     if len(list_div) > 0:
         years = re.compile('<a href="(.+?)">(.+?)</a>').findall(list_div[0])
-
         for year_url,year in years:
             addDir(year, BASE_URL + year_url, 1, '')
 
@@ -184,19 +195,15 @@ def show_list(name, b_url, language, mode):
 ##
 def show_search_box(name, url, language, mode):
     search_term = GUIEditExportName("")
-
     search_url = 'http://www.einthusan.com/search/?search_query=' + search_term + "&lang=" + language
-
     html =  HTTPInterface.http_get(search_url)
 
     match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(html)
-
+    
     # Bit of a hack again
     MOVIES_URL = "http://www.einthusan.com/movies/"
-
     for url,name in match:
         addDir(name, MOVIES_URL + url, 2, '')
-
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##

@@ -8,15 +8,17 @@ import HTTPInterface
 # Returns a tuple as follows:
 # 			(id, name, picture_url)
 ##
-def get_video_detail(movie_id):
-	API_URL = 'http://www.einthusan.com/webservice/movie.php?id=' + str(movie_id)
 
+def get_movie_detail(movie_id):
+	API_URL = 'http://www.einthusan.com/webservice/movie.php?id=' + str(movie_id)
 	html = HTTPInterface.http_get(API_URL)
 	response_json = json.loads(html)
+	return response_json['movie_id'], response_json['movie'], response_json['cover']
 
-	print response_json['movie']
-
-
+get_movie_detail(20)
+##
+#
+##
 def get_list():
 	login_url = 'http://www.einthusan.com/webservice/filters.php'
 	form_data = {}

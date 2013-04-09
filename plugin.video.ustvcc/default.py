@@ -83,7 +83,7 @@ def list_hot_TV_series (name, url, db_id, series_name, season):
   progressBar.create(ADDON.getAddonInfo('name'), "Getting metadata")
   progressBarValue = 0
 
-  url = 'http://ustv.cc/episode/Arrow.htm'
+  url = 'http://ustv.cc/episode/watch-Arrow-online.htm'
   html = http_get(url)
   matches = re.compile('<span class="jumu"><a title=".+?" href="(/episode/.+?.htm)">(.+?)</a></span><span class="nabe">(.+?)</span>').findall(html)
 
@@ -93,7 +93,9 @@ def list_hot_TV_series (name, url, db_id, series_name, season):
   BASE_URL = "http://ustv.cc"
   metahandle = metahandlers.MetaData()
 
-  interval = 90 / len(matches)
+  if (len (matches) > 0):
+    interval = 90 / len(matches)
+  
   for link, name, clicks in matches:
       displayName = name + " : [COLOR red]" + clicks + " clicks [/COLOR]"
       add_tv_show_in_list(metahandle, BASE_URL + link, name, displayName)
@@ -138,7 +140,8 @@ def list_tv_series_list_aux(html):
     progressBarValue = 15
     progressBar.update(progressBarValue)
 
-    interval = 85 / len(matches) 
+    if (len(matches) > 0):
+      interval = 85 / len(matches) 
 
     for link, name in matches:
       add_tv_show_in_list(metahandle, BASE_URL + link, name, '')
@@ -170,7 +173,8 @@ def list_seasons(name, url, db_id, series_name, season):
   progressBarValue = 10
   progressBar.update(10)
 
-  interval = 90 / len(matches)
+  if (len(matches) > 0):
+    interval = 90 / len(matches)
 
   i = 0
   for season in matches:
@@ -205,7 +209,9 @@ def list_episodes_in_season(name, url, db_id, series_name, season):
       metahandle = metahandlers.MetaData()
       progressBarValue = 20
       progressBar.update(progressBarValue)
-      interval = 80 / len (matches)
+
+      if (len(matches) > 0):
+        interval = 80 / len (matches)
 
       for link, e_name in matches:
           ep_number = int(e_name.split(' ')[0])
@@ -236,7 +242,8 @@ def list_latest_update_tv_series(name, url, db_id, series_name, season):
     progressBar.update(10)
     progressBarValue = 10;
 
-    interval = 90/len(matches)
+    if (len(matches) > 0):
+      interval = 90 / len(matches) 
 
     for link, base_name, name, ep in matches:
         ep = ep.replace('&nbsp;','')

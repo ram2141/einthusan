@@ -9,6 +9,7 @@ import xbmcaddon
 
 import HTTPInterface
 import JSONInterface
+import DBInterface
 
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 
@@ -18,22 +19,17 @@ ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 def main_categories(name, url, language, mode):
     cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/' 
-
-    addDir('Hindi', '', 7, img_path + '/Hindi_Movies.png', 'hindi')
-    addDir('Tamil', '', 7,img_path + '/Tamil_Movies.png', 'tamil')
-    addDir('Telugu', '', 7, img_path + '/Telugu_Movies.png', 'telugu')
-    addDir('Malayalam', '', 7, img_path + '/Malayalam_Movies.png', 'malayalam')
-    addDir('Addon Settings', '', 12, '', '')
-
-    JSONInterface.get_list()
-
+    addDir('Hindi', '', 7, img_path + 'Hindi_Movies.png', 'hindi')
+    addDir('Tamil', '', 7,img_path + 'Tamil_Movies.png', 'tamil')
+    addDir('Telugu', '', 7, img_path + 'Telugu_Movies.png', 'telugu')
+    addDir('Malayalam', '', 7, img_path + 'Malayalam_Movies.png', 'malayalam')
+    addDir('Addon Settings', '', 12, img_path + 'settings.png', '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
 # Shows categories for each language
 ##
 def inner_categories(name, url, language, mode, bluray=False): 
-
     cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/' 
 
@@ -84,19 +80,45 @@ def get_movies_and_music_videos(name, url, language, mode):
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
+##
+# Make a post request to the JSON API and list the movies..
+# Interacts with the other interfaces..
+##
+def list_movies_from_JSON_API(name, url, language, mode):
+    # HACK: Used "url" to transport postData because we know the API url
+    #       and dont need it here.
+    postData = url
+    response = JSONInterface.apply_filter(postData)
+
+    movie_ids = response['results']
+    add_movies_to_list(movie_ids)
+
+    max_page = int(response['max_page']) 
+    next_page = int(response['page']) + 1
+
+    if (next_page <= max_page):
+        cwd = ADDON.getAddonInfo('path')
+        img_path = cwd + '/images/next.png' 
+        addDir("[B]Next Page[/B] >>>", url + "&page=" + str(next_page), mode, img_path)
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ## http://www.einthusan.com/images/covers/
 def add_movies_to_list(movie_ids):
     ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
-    DB_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
+    DB_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'movie_info_cache.db')
+    print 'The DB file is ' + DB_FILE
 
-    print DB_FILE
-
+    COVER_BASE_URL = 'http://www.einthusan.com/images/covers/'
+    BASE_URL = 'http://www.einthusan.com/movies/watch.php?id='
     for m_id in movie_ids:
-        _, name, image = DBInterface.get_cached_movie_details("", m_id)
+        movie_info = DBInterface.get_cached_movie_details(DB_FILE, m_id)
         if (movie_info == None):
             _, name, image = JSONInterface.get_movie_detail(m_id)
-            DBInterface.save_move_details_to_cache(..., m_id, name, image)
+            DBInterface.save_move_details_to_cache(DB_FILE, m_id, name, image)
+        else:
+            _, name, image = movie_info
+        addDir(name, BASE_URL + str(m_id) ,2, COVER_BASE_URL + image)
 
 ##
 #  Just displays the two recent sections. Called when id is 3.
@@ -139,13 +161,12 @@ def show_featured_movies(name, url, language, mode):
 # Displays the options for Top Rated. Called when id is 5.
 ##
 def show_top_rated_options(name, url, language, mode):
-    INDEX_URL = url + 'index.php?organize=Rating&org_type=Rating&page=1&lang=' + language
-
-    addDir('Romance', INDEX_URL + '&filtered=Romance', 1, '')
-    addDir('Comedy', INDEX_URL + '&filtered=Comedy', 1, '')
-    addDir('Action', INDEX_URL + '&filtered=Action', 1, '')
-    addDir('Storyline', INDEX_URL + '&filtered=Storyline', 1, '')
-    addDir('Performance', INDEX_URL + '&filtered=Performance', 1, '')
+    postData = 'lang=' + language + '&organize=Rating&filtered='
+    addDir('Romance', postData + 'Romance', 15, '')
+    addDir('Comedy', postData + 'Comedy', 15, '')
+    addDir('Action', postData + 'Action', 15, '')
+    addDir('Storyline', postData + 'Storyline', 15, '')
+    addDir('Performance', postData + 'Performance', 15, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -153,11 +174,8 @@ def show_top_rated_options(name, url, language, mode):
 ##
 def show_A_Z(name, url, language, mode):
     azlist = map (chr, range(65,91))
-
     INDEX_URL = url + 'index.php?organize=Alphabetical&org_type=Alphabetical&lang='+language
-
     addDir('Numerical', INDEX_URL + '&filtered=Numerical', 1, '')
-
     for letter in azlist:
         addDir(letter, INDEX_URL + '&filtered=' + letter, 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -171,7 +189,6 @@ def show_A_Z(name, url, language, mode):
 # 11: List of directors
 ## 
 def show_list(name, b_url, language, mode):
-
     url = b_url + 'index.php?organize=Director'
     if (mode == 9):
         url = b_url + 'index.php?organize=Year'
@@ -374,5 +391,6 @@ function_map[11] = show_list
 function_map[12] = display_setting
 function_map[13] = display_BluRay_listings
 function_map[14] = list_music_videos
+function_map[15] = list_movies_from_JSON_API
 
 function_map[mode](name, url, language, mode)

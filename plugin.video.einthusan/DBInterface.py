@@ -16,14 +16,11 @@ def get_cached_movie_details(cache_db_file, id):
 	if (len (cached_results) > 0):
 		return cached_results[0]
 
-
+##
+# Saves a new movie to the cache. Does *not* check for duplication.
+##
 def save_move_details_to_cache(cache_db_file, id, name, picture):
 	conn = sqlite3.connect(cache_db_file)
 	cursor = conn.cursor()
 	cursor.execute('INSERT INTO movie_detail_cache VALUES ("'+str(id)+'","'+str(name)+'","'+str(picture)+ '")')
 	conn.commit()
-
-movie_details = get_cached_movie_details("my_db.db", 12)
-if (movie_details == None):
-	save_move_details_to_cache("my_db.db", 12, 'Dus', 'dus_.jpg')
-print get_cached_movie_details("my_db.db", 12)

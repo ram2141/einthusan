@@ -14,24 +14,12 @@ def get_movie_detail(movie_id):
 	html = HTTPInterface.http_get(API_URL)
 	response_json = json.loads(html)
 	return response_json['movie_id'], response_json['movie'], response_json['cover']
-
-get_movie_detail(20)
 ##
-#
+# Returns a list of movie id for a specific filters
+# returns json decoded of the response from the server
 ##
-def get_list():
-	login_url = 'http://www.einthusan.com/webservice/filters.php'
-	form_data = {}
-	form_data['lang'] = 'tamil'
-	form_data['organize'] = 'Rating'
-	form_data['filtered'] = 'Comedy'
+def apply_filter(filters):
+	API_URL = 'http://www.einthusan.com/webservice/filters.php'
 
-	result = HTTPInterface.http_post(login_url, form_data)
-
-	a = json.loads(result)
-	test = a['results']
-
-	print get_video_detail(50)
-
-	#for sad in test:
-		#print sad
+	result = HTTPInterface.http_post(API_URL, data=filters)
+	return  json.loads(result)

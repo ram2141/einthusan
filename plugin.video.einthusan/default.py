@@ -43,10 +43,10 @@ def inner_categories(name, url, language, mode, bluray=False):
     addDir('Director', postData, 11, img_path + 'director.png', language)
     addDir('Recent', postData, 3, img_path + 'recent.png', language)
     addDir('Top Rated', postData, 5, img_path + 'top_rated.png', language)
-    addDir('Search', postData, 6, img_path + 'Search_by_title.png', language)
     if not bluray:
         addDir('Featured', '', 4, img_path + 'featured_videos.png', language)
         addDir('Blu-Ray', '', 13, img_path + 'Bluray.png', language)
+        addDir('Search', postData, 6, img_path + 'Search_by_title.png', language)
         addDir('Music Video', '' , 14, img_path + 'music_videos.png', language)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 

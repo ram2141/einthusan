@@ -1,21 +1,25 @@
 #!/bin/bash
 
-echo "Updating "  $1  " to version "  $2 
+echo "Looking for addons to update"
 
-if [ $1 = "CanadaNepal" ]; then
-    rm -f repo/plugin.video.canadanepal/*.zip
-    zip -r repo/plugin.video.canadanepal/plugin.video.canadanepal-$2.zip plugin.video.canadanepal/
-    cp plugin.video.canadanepal/changelog.txt repo/plugin.video.canadanepal/
-elif [ $1 = "Einthusan" ]; then
-    rm -f repo/plugin.video.einthusan/*.zip
-    zip -r repo/plugin.video.einthusan/plugin.video.einthusan-$2.zip plugin.video.einthusan/
-    cp plugin.video.einthusan/changelog.txt repo/plugin.video.einthusan/
-elif [ $1 = "Repo" ]; then
-    rm -f repo/repository.humla/*.zip
-    zip -r repo/repository.humla/repository.humla-$2.zip repository.humla/
-    cp repository.humla/changelog.txt repo/repository.humla/
-elif [ $1 = "Ustvcc" ]; then
-    rm -f repo/plugin.video.ustvcc/*.zip
-    zip -r repo/plugin.video.ustvcc/plugin.video.ustvcc-$2.zip plugin.video.ustvcc/
-    cp plugin.video.ustvcc/changelog.txt repo/plugin.video.ustvcc/
-fi
+for plugin in `ls -d *`
+do
+    if [ -f $plugin/addon.xml ]
+    then
+        if [ ! -f  $plugin/pre_release ]
+        then 
+            echo "Checking addon" $plugin
+            latest_version_number=`cat $plugin/addon.xml | grep "  version=" | grep -Po '(?<=")[^"]+(?=")'`
+            repo_version_number=`ls repo/$plugin/*.zip |  grep -Po '\d.\d.\d'`
+            echo "Dev version=" $latest_version_number " VS Repo Version=" $repo_version_number
+
+            if [ $latest_version_number != $repo_version_number ] ; then
+                echo "Update found..... Updating to version " $latest_version_number
+                rm -rf repo/$plugin/*.zip
+                zip -r repo/$plugin/$plugin-$latest_version_number.zip $plugin/
+                cp $plugin/changelog.txt repo/$plugin
+            fi
+        fi
+    echo '------------------------------------------------'
+    fi
+done

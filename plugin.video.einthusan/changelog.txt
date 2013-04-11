@@ -1,3 +1,11 @@
+[B]Version 1.0.0[/B] 
+- Used the Einthusan JSON API
+- Cache movie name and cover image filename indexed by movie id
+- Caching is done in a sqlite db
+- Some more icons
+- Removed dependency not t0mm0 net, used urllib2 instead (Net() wasnt giving any benefit)
+- Other bug fixes
+
 [B]Version 0.5.4[/B] 
 - Added some more icons.
 

@@ -33,22 +33,21 @@ def inner_categories(name, url, language, mode, bluray=False):
     cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/' 
 
-    base_url = 'http://www.einthusan.com/movies/'
+    postData = 'lang=' + language + '&'
     if bluray:
-        base_url = 'http://www.einthusan.com/bluray/'
+        postData = 'lang=' + language + '&bluray=1&'
 
-    addDir('A-Z', base_url, 8, img_path + 'a_z.png', language)
-    addDir('Years', base_url, 9, img_path + 'years.png', language)
-    addDir('Actors', base_url, 10, img_path + 'actors.png', language)
-    addDir('Director', base_url, 11, img_path + 'director.png', language)
-    addDir('Recent', base_url, 3, img_path + 'recent.png', language)
-    addDir('Top Rated', base_url, 5, img_path + 'top_rated.png', language)
+    addDir('A-Z', postData, 8, img_path + 'a_z.png', language)
+    addDir('Years', postData, 9, img_path + 'years.png', language)
+    addDir('Actors', postData, 10, img_path + 'actors.png', language)
+    addDir('Director', postData, 11, img_path + 'director.png', language)
+    addDir('Recent', postData, 3, img_path + 'recent.png', language)
+    addDir('Top Rated', postData, 5, img_path + 'top_rated.png', language)
+    addDir('Search', postData, 6, img_path + 'Search_by_title.png', language)
     if not bluray:
         addDir('Featured', '', 4, img_path + 'featured_videos.png', language)
-        addDir('Blu-Ray', '', 13, img_path + '/Bluray.png', language)
-        addDir('Search', '', 6, img_path + '/Search_by_title.png', language)
+        addDir('Blu-Ray', '', 13, img_path + 'Bluray.png', language)
         addDir('Music Video', '' , 14, img_path + 'music_videos.png', language)
-
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -77,7 +76,6 @@ def get_movies_and_music_videos(name, url, language, mode):
         next_page = re.compile('<a class="numerical-nav-selected" href=".+?">.+?</a><a href=".+?">(.+?)</a>').findall(numerical_nav[0])
         if (len(next_page) == 1):
             addDir("Next >>", url + "&page=" + next_page[0], mode, "http://www.sahara.co.za/Images/next.jpg", '')
-
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -90,31 +88,40 @@ def list_movies_from_JSON_API(name, url, language, mode):
     postData = url
     response = JSONInterface.apply_filter(postData)
 
-    movie_ids = response['results']
-    add_movies_to_list(movie_ids)
+    if ('results' in response):
+        movie_ids = response['results']
 
-    max_page = int(response['max_page']) 
-    next_page = int(response['page']) + 1
+        bluray = False
+        if (url.find('bluray') > -1):
+            bluray = True
+        add_movies_to_list(movie_ids, bluray)
 
-    if (next_page <= max_page):
-        cwd = ADDON.getAddonInfo('path')
-        img_path = cwd + '/images/next.png' 
-        addDir("[B]Next Page[/B] >>>", url + "&page=" + str(next_page), mode, img_path)
+        max_page = int(response['max_page']) 
+        next_page = int(response['page']) + 1
+
+        if (next_page <= max_page):
+            cwd = ADDON.getAddonInfo('path')
+            img_path = cwd + '/images/next.png' 
+            addDir("[B]Next Page[/B] >>>", url + "&page=" + str(next_page), mode, img_path)
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ## http://www.einthusan.com/images/covers/
-def add_movies_to_list(movie_ids):
+def add_movies_to_list(movie_ids, bluray):
     ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
     DB_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'movie_info_cache.db')
-    print 'The DB file is ' + DB_FILE
 
     COVER_BASE_URL = 'http://www.einthusan.com/images/covers/'
-    BASE_URL = 'http://www.einthusan.com/movies/watch.php?id='
+    if (bluray):
+        BASE_URL = 'http://www.einthusan.com/movies/watch.php?bluray=true&id='
+    else:
+        BASE_URL = 'http://www.einthusan.com/movies/watch.php?id='
     for m_id in movie_ids:
         movie_info = DBInterface.get_cached_movie_details(DB_FILE, m_id)
         if (movie_info == None):
             _, name, image = JSONInterface.get_movie_detail(m_id)
+            if (image == None):
+                image = ''
             DBInterface.save_move_details_to_cache(DB_FILE, m_id, name, image)
         else:
             _, name, image = movie_info
@@ -124,26 +131,12 @@ def add_movies_to_list(movie_ids):
 #  Just displays the two recent sections. Called when id is 3.
 ##
 def show_recent_sections(name, url, language, mode):
-    INDEX_URL = url + 'index.php?organize=Activity&org_type=Activity&page=1&lang='+language
+    cwd = ADDON.getAddonInfo('path')
+    img_path = cwd + '/images/' 
 
-    addDir('Recently Posted', INDEX_URL + '&filtered=RecentlyPosted', 1, '', '')
-    addDir('Recently Viewed', INDEX_URL + '&filtered=RecentlyViewed', 1, '', '')
-    xbmcplugin.endOfDirectory(int(sys.argv[1]))
-
-##
-# Shows the sections for Top Viewed. Called when id is 4.
-#  ******* The website has dropped this *******************
-##
-def show_top_viewed_options(name, url, language, mode):
-    INDEX_URL = url + 'index.php?organize=Statistics&org_type=Statistics&page=1&lang='+language
-
-    addDir('All Time', INDEX_URL + '&filtered=AllTimeViews' , 1, '', '')
-    addDir('This Week', INDEX_URL + '&filtered=ThisWeekViews', 1, '', '')
-    addDir('Last Week', INDEX_URL + '&filtered=LastWeekViews', 1, '', '')
-    addDir('This Month', INDEX_URL + '&filtered=ThisMonthViews', 1, '', '')
-    addDir('Last Month', INDEX_URL + '&filtered=LastMonthViews' , 1, '', '')
-    addDir('This Year', INDEX_URL + '&filtered=ThisYearViews' , 1, '', '')
-    addDir('Last Year', INDEX_URL + '&filtered=LastYearViews' , 1, '', '')
+    postData = url + '&organize=Activity&filtered='
+    addDir('Recently Posted',  postData + 'RecentlyPosted', 15, img_path + 'recently_added.png')
+    addDir('Recently Viewed', postData + 'RecentlyViewed', 15, img_path + 'recently_viewed.png')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 # Shows the movie in the homepage..
@@ -161,12 +154,15 @@ def show_featured_movies(name, url, language, mode):
 # Displays the options for Top Rated. Called when id is 5.
 ##
 def show_top_rated_options(name, url, language, mode):
-    postData = 'lang=' + language + '&organize=Rating&filtered='
-    addDir('Romance', postData + 'Romance', 15, '')
-    addDir('Comedy', postData + 'Comedy', 15, '')
-    addDir('Action', postData + 'Action', 15, '')
-    addDir('Storyline', postData + 'Storyline', 15, '')
-    addDir('Performance', postData + 'Performance', 15, '')
+    cwd = ADDON.getAddonInfo('path')
+    img_path = cwd + '/images/' 
+
+    postData = url + '&organize=Rating&filtered='
+    addDir('Romance', postData + 'Romance', 15, img_path + 'romance.png')
+    addDir('Comedy', postData + 'Comedy', 15, img_path + 'comedy.png')
+    addDir('Action', postData + 'Action', 15, img_path + 'action.png')
+    addDir('Storyline', postData + 'Storyline', 15, img_path + 'storyline.png')
+    addDir('Performance', postData + 'Performance', 15, img_path + 'performance.png')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -174,13 +170,12 @@ def show_top_rated_options(name, url, language, mode):
 ##
 def show_A_Z(name, url, language, mode):
     azlist = map (chr, range(65,91))
-    INDEX_URL = url + 'index.php?organize=Alphabetical&org_type=Alphabetical&lang='+language
-    addDir('Numerical', INDEX_URL + '&filtered=Numerical', 1, '')
+    postData = url + "&organize=Alphabetical&filtered="
+    addDir('Numerical', postData + 'Numerical', 15, '')
     for letter in azlist:
-        addDir(letter, INDEX_URL + '&filtered=' + letter, 1, '')
+        addDir(letter, postData + letter, 15, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-    
 ##
 # Single method that shows the list of years, actors and directors. 
 # Called when id is 9, 10, 11
@@ -189,21 +184,21 @@ def show_A_Z(name, url, language, mode):
 # 11: List of directors
 ## 
 def show_list(name, b_url, language, mode):
-    url = b_url + 'index.php?organize=Director'
     if (mode == 9):
-        url = b_url + 'index.php?organize=Year'
+        postData = b_url + 'organize=Year'
+        values = JSONInterface.get_year_list(language)
     elif (mode == 10):
-        url = b_url + 'index.php?organize=Cast'
-    url = url + "&lang="+language
+        postData = b_url + 'organize=Cast'
+        values = JSONInterface.get_actor_list(language)
+    else:
+        postData = b_url + 'organize=Director'
+        values = JSONInterface.get_director_list(language)
 
-    BASE_URL = b_url + 'index.php'
-    html =  HTTPInterface.http_get(url)
-    list_div = re.compile('<div class="video-organizer-element-wrapper">(.+?)</div>').findall(html)
+    postData = postData + '&filtered='
 
-    if len(list_div) > 0:
-        years = re.compile('<a href="(.+?)">(.+?)</a>').findall(list_div[0])
-        for year_url,year in years:
-            addDir(year, BASE_URL + year_url, 1, '')
+    for attr_value in values:
+        if (attr_value != None):
+            addDir(attr_value, postData + attr_value, 15, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -212,16 +207,8 @@ def show_list(name, b_url, language, mode):
 ##
 def show_search_box(name, url, language, mode):
     search_term = GUIEditExportName("")
-    search_url = 'http://www.einthusan.com/search/?search_query=' + search_term + "&lang=" + language
-    html =  HTTPInterface.http_get(search_url)
-
-    match = re.compile('<a href="(../movies/watch.php.+?)">(.+?)</a>').findall(html)
-    
-    # Bit of a hack again
-    MOVIES_URL = "http://www.einthusan.com/movies/"
-    for url,name in match:
-        addDir(name, MOVIES_URL + url, 2, '')
-    xbmcplugin.endOfDirectory(int(sys.argv[1]))
+    postData = url + 'search=' + search_term
+    list_movies_from_JSON_API(name, postData, language, 15)
 
 ##
 #  Displays a list of music videos
@@ -304,7 +291,7 @@ def GUIEditExportName(name):
     while (exit):
           kb = xbmc.Keyboard('default', 'heading', True)
           kb.setDefault(name)
-          kb.setHeading("Enter the search term")
+          kb.setHeading("Enter the search term (no spaces)")
           kb.setHiddenInput(False)
           kb.doModal()
           if (kb.isConfirmed()):
@@ -335,10 +322,10 @@ def addDir(name, url, mode, iconimage, lang=''):
     return ok
 
 params=get_params()
-url=None
-name=None
+url=''
+name=''
 mode=0
-language=None
+language=''
 
 try:
     url=urllib.unquote_plus(params["url"])

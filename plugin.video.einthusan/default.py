@@ -227,19 +227,22 @@ def http_request_with_login(url):
 # Plays the video. Called when the id is 2.
 ##
 def play_video(name, url, language, mode):
+    print url
     html =  http_request_with_login(url)
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
+    print match
 
     if (len(match) == 0):
         match = re.compile("'file': '(.+?)'").findall(html)
+        print match
 
-    # Bit of a hack again
-    MOVIES_URL = "http://www.einthusan.com/movies/"
 
     image_link = language
     if (image_link == ""):
         thumbnail_match = re.compile('<img src="(../images.+?)"').findall(html)
         if (len (thumbnail_match) > 0):
+            # Bit of a hack again
+            MOVIES_URL = "http://www.einthusan.com/movies/"
             image_link = MOVIES_URL + thumbnail_match[0]
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)

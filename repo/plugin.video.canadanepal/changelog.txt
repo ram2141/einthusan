@@ -1,8 +1,6 @@
-[B]Version 0.3.8[/B]
+[B]Version 0.4.0[/B]
 - Better error handling
-
-[B]Version 0.3.5[/B]
-- Added Google Analytics
+- Bug fixes
 
 [B]Version 0.3.3[/B]
 - Improved Http request by using t0mm0's library

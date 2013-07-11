@@ -48,6 +48,7 @@ def inner_categories(name, url, language, mode, bluray=False):
         addDir('Blu-Ray', '', 13, img_path + 'Bluray.png', language)
         addDir('Search', postData, 6, img_path + 'Search_by_title.png', language)
         addDir('Music Video', '' , 14, img_path + 'music_videos.png', language)
+        #addDir('Mp3 Music', '', 16, '', language)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##
@@ -78,6 +79,15 @@ def get_movies_and_music_videos(name, url, language, mode):
             addDir("Next >>", url + "&page=" + next_page[0], mode, "http://www.sahara.co.za/Images/next.jpg", '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
+
+##
+# Displays the menu for mp3 music..
+# Called when id is 16
+## 
+def mp3_menu(name, url, language, mode):
+    #addDir('')
+    return 1
+
 ##
 # Make a post request to the JSON API and list the movies..
 # Interacts with the other interfaces..
@@ -106,7 +116,6 @@ def list_movies_from_JSON_API(name, url, language, mode):
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-## http://www.einthusan.com/images/covers/
 def add_movies_to_list(movie_ids, bluray):
     ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
     DB_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'movie_info_cache.db')
@@ -227,15 +236,12 @@ def http_request_with_login(url):
 # Plays the video. Called when the id is 2.
 ##
 def play_video(name, url, language, mode):
-    print url
+    print "Playing: " + name + ", with url:"+ url
     html =  http_request_with_login(url)
     match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
-    print match
 
     if (len(match) == 0):
         match = re.compile("'file': '(.+?)'").findall(html)
-        print match
-
 
     image_link = language
     if (image_link == ""):
@@ -382,5 +388,6 @@ function_map[12] = display_setting
 function_map[13] = display_BluRay_listings
 function_map[14] = list_music_videos
 function_map[15] = list_movies_from_JSON_API
+function_map[16] = mp3_menu
 
 function_map[mode](name, url, language, mode)

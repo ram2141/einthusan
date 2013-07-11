@@ -32,6 +32,7 @@ def get_options(attr, language):
 	try:
 		return result['organize'][attr]['filtered']
 	except KeyError, e:
+		print "Key Error "  
 		return {}
 	
 ##

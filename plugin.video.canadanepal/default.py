@@ -94,7 +94,7 @@ def clear_htmltags(name):
 # Lists the new episodes of TV series
 def INDEX(url):
     html = make_http_get(url)
-    match=re.compile('<div>.+?<font size="2">(.+?)<a href="(.+?)".+?Click').findall(html)
+    match=re.compile('(.+?)<a href="(.+?html)".+?Click').findall(html)
     image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     for name,url in match:
         name = clear_htmltags(name).encode("utf-8")

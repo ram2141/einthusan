@@ -14,7 +14,7 @@ do
             echo "Dev version=" $latest_version_number " VS Repo Version=" $repo_version_number
 
             if [ $latest_version_number != $repo_version_number ] ; then
-                echo "Update found..... Updating to version " $latest_version_number
+                echo "[UPDATE FOUND]: Updating to version " $latest_version_number
                 rm -rf repo/$plugin/*.zip
                 zip -rq repo/$plugin/$plugin-$latest_version_number.zip $plugin/
                 cp $plugin/changelog.txt repo/$plugin

@@ -15,7 +15,6 @@ def get_net():
   user_agent = "Mozilla/5.0 (X11; U; GNU Hurd; C -) AppleWebKit/527+ (KHTML, like Gecko, Safari/419.3) Arora/0.10.1"
   return Net(user_agent=user_agent)
 
-# Mozilla/5.0 (X11; U; GNU Hurd; C -) AppleWebKit/527+ (KHTML, like Gecko, Safari/419.3) Arora/0.10.1 
 def http_get(url):
   net = get_net()
   try:
@@ -204,16 +203,19 @@ def list_episodes_in_season(name, url, db_id, series_name, season):
   progressBar.update(progressBarValue)
 
   if (len(bulk) > 0):
-      matches = re.compile('<a href="(.+?)">(.+?)</a>').findall(bulk[0][0])
+      name_matches = re.compile('<li>(.+?)\n').findall(bulk[0][0])
+      links_matches = re.compile('<a title=".+?" href="(.+?)"').findall(bulk[0][0])
+      name_links_matches = zip(name_matches, links_matches)
+
       BASE_URL = "http://www.ustv.cc"
       metahandle = metahandlers.MetaData()
       progressBarValue = 20
       progressBar.update(progressBarValue)
 
-      if (len(matches) > 0):
-        interval = 80 / len (matches)
+      if (len(name_matches) > 0):
+        interval = 80 / len (name_matches)
 
-      for link, e_name in matches:
+      for e_name, link in name_links_matches:
           ep_number = int(e_name.split(' ')[0])
           meta = metahandle.get_episode_meta('', db_id, name, ep_number)
           addDir(e_name, BASE_URL + link, 2, meta['cover_url'], db_id=db_id, meta=meta, season=season, series_name=series_name)

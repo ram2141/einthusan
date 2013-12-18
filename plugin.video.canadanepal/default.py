@@ -2,6 +2,7 @@
 
 import re
 import os
+import json
 import urlresolver
 import urllib,urllib2
 import xbmcplugin,xbmcgui
@@ -33,7 +34,7 @@ def CATEGORIES():
     addDir('Live TV', cwd + '/resources/live_tv.xml', 6, 'http://canadanepal.info/images/banner/onlinetvf.jpg')
     addDir('Live Radio', 'http://canadanepal.info/fm/',4, 'http://canadanepal.info/images/listenfmlogo.gif')
     addDir('Daily News', 'http://canadanepal.info/dailynews/',7,'http://canadanepal.info/images/banner/samachar20.jpg')
-    addDir('Sports News', 'http://canadanepal.info/sports/',8,'http://nepalitvshow.com/wp-content/uploads/2012/06/Scoreboard.jpg')
+    #addDir('Sports News', 'http://canadanepal.info/sports/',8,'http://nepalitvshow.com/wp-content/uploads/2012/06/Scoreboard.jpg')
     addDir('Home Page', 'http://canadanepal.info',9,'http://a.webutation.net/3/3/canadanepal.net.jpg')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -137,12 +138,22 @@ def get_youtube_link(html):
 def get_blip_tv_link(html):
     match=re.compile('"(http://(www.)?blip.tv/play/.+?)"').findall(html)
     return [a for a,b in match]
-    
+
+def get_playwire_link(html):
+    match = re.compile('data-publisher-id="(.+?)" data-video-id="(.+?)"').findall(html)
+    return [convert_playwire_link(x) for  x in match ]
+
+def convert_playwire_link((publisher, video)):
+    info_link = 'http://cdn.playwire.com/v2/' + publisher + '/config/' + video  +'.json'
+    info = make_http_get(info_link)
+    response_json = json.loads(info)
+    return response_json["src"]
+
 def VIDEOLINKS(url,name):
     html = make_http_get(url)    
-    match = get_youtube_link(html)
+    match = get_playwire_link(html)
     if (len(match) == 0):
-        match = get_blip_tv_link(html)
+        match = get_youtube_link(html)
     if (len(match) == 0):
         match = get_dailymotion_link(html)
     i = 1
@@ -151,11 +162,10 @@ def VIDEOLINKS(url,name):
     all_url = ""
     for url in match:
         all_url = all_url + url + " "
-        domain = GetDomain(url)
-        addDir(domain + " : Part  " + str(i) + " of " + str(length), url, 3, image_path + domain + '.jpg')
+        addDir("Part  " + str(i) + " of " + str(length), url, 3, "")
         i = i + 1
     if (i > 2):
-        addDir(domain + " : Play All", all_url, 3, image_path + domain + '.jpg');
+        addDir("Play All", all_url, 3, "");
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 def play_video(url):
@@ -170,15 +180,8 @@ def play_video(url):
 
 def get_stream_url(url):
     domain = GetDomain(url)
-    if domain == "blip.tv":
-        req = urllib2.Request(url)
-        response = urllib2.urlopen(req)
-        res=response.read()
-        redirect =  response.geturl()
-        response.close()
-        v_id=re.compile('flash%2F(\d\d\d\d\d\d\d)').findall(redirect)
-        stream_url= 'plugin://plugin.video.bliptv/?action=play_video&videoid=' + v_id[0]
-    else:    
+    stream_url = url
+    if domain == "youtube.com":
         stream_url = urlresolver.resolve(url)
     return stream_url
     

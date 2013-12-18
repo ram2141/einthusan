@@ -57,6 +57,10 @@ def main_categories(name, url, db_id, series_name, season):
   addDir('Hot TV Series', '', 7, '')
   addDir('Latest Updates TV Series', '', 8, '')
   addDir('New TV Episodes', '', 8, '')
+  addDir('Free TV Shows', 'http://ustv.cc/free.htm', 5, '')
+
+
+  #addDir(letter, url + letter + '.htm', 5, '', db_id=db_id)
   #addDir('Favourites', '', 8, '')
   #addDir('Search', '', 6, '')
   addDir('Settings', '', 9, '') 
@@ -70,9 +74,7 @@ def main_categories(name, url, db_id, series_name, season):
 
 def a_z_view(name, url, db_id, series_name, season):
   azlist = map (chr, range(97,122))
-
   addDir('Numerical', url + 'num.htm', 5, '')
-
   for letter in azlist:
       addDir(letter, url + letter + '.htm', 5, '', db_id=db_id)
   xbmcplugin.endOfDirectory(int(sys.argv[1]))   
@@ -259,6 +261,10 @@ def list_latest_update_tv_series(name, url, db_id, series_name, season):
   else:
     xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Cannot find TV series', '', '') 
 
+def list_free_tv_shows(name, url, db_id, series_name, season):
+
+  print url
+
 ##
 # Shows the search box for serching. Shown when the id is 6.
 ##
@@ -417,18 +423,16 @@ except:
 
 # Modes
 # 0: The main Categories Menu. Selection of language
-# 1: For scraping the movies from a list of movies in the website
+# 1: List season when a tv show is selected
 # 2: For playing a video
-# 3: The Recent Section
-# 4: The top viewed list. like above
-# 5: The top rated list. Like above
+# 3: A-Z view
+# 4: List episodes when a season selected
+# 5: Display the list of tv series in the page
 # 6: Search options
-# 7: Sub menu
-# 8: A-Z view.
-# 9: Yearly view
-# 10: Actor view
-# 11: Director view
-# 12: Show Addon Settings
+# 7: List Hot Tv series
+# 8: List latest update to tv shows
+# 9: Display settings
+# 10: List Free Tv Shows
 
 function_map = {}
 function_map[0] = main_categories
@@ -441,7 +445,6 @@ function_map[6] = show_search_box
 function_map[7] = list_hot_TV_series
 function_map[8] = list_latest_update_tv_series
 function_map[9] = display_setting
-
-
+function_map[10] = list_free_tv_shows
 
 function_map[mode](name, url, db_id, series_name, season)

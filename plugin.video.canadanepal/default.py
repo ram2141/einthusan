@@ -29,7 +29,7 @@ def make_http_get(url):
 def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/'
-    addDir('Latest Videos', 'http://www.canadanepal.info', 1, 'http://canadanepal.info/images/tvprograms.gif')
+    addDir('Latest Videos', 'http://npvideo.com/category/comedy', 1, 'http://canadanepal.info/images/tvprograms.gif')
     addDir('Live TV', cwd + '/resources/live_tv.xml', 6, 'http://canadanepal.info/images/banner/onlinetvf.jpg')
     addDir('Live Radio', 'http://canadanepal.info/fm/',4, 'http://canadanepal.info/images/listenfmlogo.gif')
     addDir('Daily News', 'http://canadanepal.info/dailynews/',7,'http://canadanepal.info/images/banner/samachar20.jpg')
@@ -94,13 +94,13 @@ def clear_htmltags(name):
 # Lists the new episodes of TV series
 def INDEX(url):
     html = make_http_get(url)
-    match=re.compile('(.+?)<a href="(.+?html)".+?Click').findall(html)
-    image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
-    for name,url in match:
-        name = clear_htmltags(name).encode("utf-8")
-        image_name = name[:4]
-        image_url = image_base_url + image_name + '.jpg'
-        addDir(name,url,2,image_url)
+    match=re.compile('<h4><a href="(.+?)" title=".+?">(.+?)</a></h4>').findall(html)
+    #image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
+    for url,name in match:
+        name = name.encode("utf-8")
+        #image_name = name[:4]
+        #image_url = image_base_url + image_name + '.jpg'
+        addDir(name,url,2,'')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 # Show the list of live tv 
@@ -120,7 +120,6 @@ def SHOWLIVETVLIST(url):
 def get_dailymotion_link(html):
     match=re.compile('"(http://www.dailymotion.com/video/.+?)"').findall(html)
     if (len(match) == 0):
-        print "Dailymotion doing alternate scraping"
         match=re.compile('<iframe src="(.+?)"').findall(html)
     length = len(match)
     while length > 0:
@@ -131,7 +130,7 @@ def get_dailymotion_link(html):
 def get_youtube_link(html):
     match=re.compile('"http://www.youtube.com/v/(.+?)"').findall(html)
     if (len(match) == 0):
-        match = re.compile('"http://www.youtube.com/embed/(.+?)"').findall(html)
+        match = re.compile('".+?youtube.com/embed/(.+?)"').findall(html)
     match = set(match)  
     return ["http://www.youtube.com/watch?v="+a for a in match]
 
@@ -185,7 +184,6 @@ def get_stream_url(url):
     
 def get_homePageStuff(url):
     html = make_http_get(url)
-    
     data = re.compile('<div id="bodyimg">((.|\n)+?)<!-- Fm Programs -->((.|\n)+?)<div id="Interview With Raju Lama">((.|\n)+?)<div id="Calender">').findall(html)
     get_homePageStuffHelper(data[0][0])
     get_homePageStuffHelper(data[0][4])

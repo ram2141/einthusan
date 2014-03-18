@@ -2,10 +2,10 @@
 <addons>
 <addon id="plugin.video.canadanepal"
        name="CanadaNepal"
-       version="0.4.2"
+       version="0.4.3"
        provider-name="humla">
     <requires>
-        <import addon="xbmc.python" version="2.0"/>
+        <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.urlresolver" version="1.0.0"/>
         <import addon="script.module.t0mm0.common" version="1.0.0"/>
     </requires>
@@ -21,10 +21,10 @@
 </addon>
 <addon id="plugin.video.einthusan"
        name="Einthusan"
-       version="1.0.2"
+       version="1.0.3"
        provider-name="humla">
     <requires>
-        <import addon="xbmc.python" version="2.0"/>
+        <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.t0mm0.common" version="1.0.0"/>
     </requires>
     <extension point="xbmc.python.pluginsource"
@@ -41,10 +41,10 @@
 </addon>
 <addon id="plugin.video.ustvcc"
        name="Ustvcc"
-       version="0.1.4"
+       version="0.1.5"
        provider-name="humla">
     <requires>
-        <import addon="xbmc.python" version="2.0"/>
+        <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.t0mm0.common" version="1.1.0"/>
         <import addon="script.module.metahandler" version="1.0.0"/>
     </requires>

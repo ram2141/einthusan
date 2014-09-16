@@ -1,5 +1,5 @@
 import json
-
+import time
 import HTTPInterface
 
 ##
@@ -9,6 +9,7 @@ import HTTPInterface
 # 			(id, name, picture_url)
 ##
 def get_movie_detail(movie_id):
+	time.sleep(0.4)
 	API_URL = 'http://www.einthusan.com/webservice/movie.php?id=' + str(movie_id)
 	html = HTTPInterface.http_get(API_URL)
 	response_json = json.loads(html)

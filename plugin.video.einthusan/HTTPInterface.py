@@ -14,7 +14,6 @@ def http_get(url, username='', password =''):
     try:
         return Net().http_GET(url).content
     except urllib2.URLError, e:
-        xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Unable to connect to website', '', '') 
         return ""
 
 def http_post(url, postData={}, data=''):
@@ -23,5 +22,4 @@ def http_post(url, postData={}, data=''):
             postData = dict(urlparse.parse_qsl(data))
         return Net().http_POST(url, postData).content
     except urllib2.URLError, e:
-        xbmcgui.Dialog().ok(ADDON.getAddonInfo('name'), 'Unable to login to website', '', '') 
         return ""

@@ -13,6 +13,7 @@ import DBInterface
 
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 
+
 ##
 # Prints the main categories. Called when id is 0.
 ##
@@ -61,7 +62,10 @@ def display_BluRay_listings(name, url, language, mode):
 #  Scrapes a list of movies and music videos from the website. Called when mode is 1.
 ##
 def get_movies_and_music_videos(name, url, language, mode):
-    html =  HTTPInterface.http_get(url)
+    ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+    COOKIE_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
+
+    html =  HTTPInterface.http_get(url, cookie_file=COOKIE_FILE)
     match = re.compile('<div class="(video|music)-object-thumb"><a href="(.+?)">(.+?<a class="movie-cover-wrapper".+?>)?<img src="(.+?)" alt="(.+?)"').findall(html)
 
     # Bit of a hack
@@ -151,7 +155,10 @@ def show_recent_sections(name, url, language, mode):
 # Shows the movie in the homepage..
 def show_featured_movies(name, url, language, mode):
     page_url = 'http://www.einthusan.com/index.php?lang=' + language
-    html = HTTPInterface.http_get(page_url)
+
+    ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+    COOKIE_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
+    html = HTTPInterface.http_get(page_url, cookie_file = COOKIE_FILE)
     matches = re.compile('<a class="movie-cover-wrapper" href="(.+?)"><img src="(.+?)" alt="(.+?)" ').findall(html)
 
     BASE_URL = 'http://www.einthusan.com/'
@@ -230,7 +237,10 @@ def list_music_videos(name, url, language, mode):
 def http_request_with_login(url):
     username = xbmcplugin.getSetting(int(sys.argv[1]), 'username')
     password = xbmcplugin.getSetting(int(sys.argv[1]), 'password')
-    return HTTPInterface.http_get(url, username, password)
+
+    ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+    COOKIE_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
+    return HTTPInterface.http_get(url, COOKIE_FILE,username, password)
 
 ##
 # Plays the video. Called when the id is 2.

@@ -1,3 +1,6 @@
+[B]Version 1.0.5[/B] 
+- Add default list of years
+
 [B]Version 1.0.0[/B] 
 - Used the Einthusan JSON API
 - Cache movie name and cover image filename indexed by movie id

@@ -6,6 +6,7 @@ import urllib, urllib2
 import xbmcplugin
 import xbmcgui
 import xbmcaddon
+from datetime import date
 
 import HTTPInterface
 import JSONInterface
@@ -201,8 +202,12 @@ def show_A_Z(name, url, language, mode):
 ## 
 def show_list(name, b_url, language, mode):
     if (mode == 9):
-        postData = b_url + 'organize=Year'
-        values = JSONInterface.get_year_list(language)
+        try:
+            postData = b_url + 'organize=Year'
+            values = JSONInterface.get_year_list(language)
+        except:
+            # build default list of years
+            values = [repr(x) for x in reversed(range(1950, date.today().year + 1))]
     elif (mode == 10):
         postData = b_url + 'organize=Cast'
         values = JSONInterface.get_actor_list(language)

@@ -20,7 +20,6 @@ def get_movie_detail(movie_id):
 ##
 def apply_filter(filters):
 	API_URL = 'http://www.einthusan.com/webservice/filters.php'
-
 	result = HTTPInterface.http_post(API_URL, data=filters)
 	return  json.loads(result)
 

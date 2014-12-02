@@ -315,17 +315,12 @@ def GUIEditExportName(name):
     while (exit):
           kb = xbmc.Keyboard('default', 'heading', True)
           kb.setDefault(name)
-          kb.setHeading("Enter the search term (no spaces)")
+          kb.setHeading("Enter the search term")
           kb.setHiddenInput(False)
           kb.doModal()
           if (kb.isConfirmed()):
-              name_confirmed  = kb.getText()
-              name_correct = name_confirmed.count(' ')
-              if (name_correct):
-                 GUIInfo(2,__language__(33224)) 
-              else: 
-                   name = name_confirmed
-                   exit = False
+              name = kb.getText()
+              exit = False
           else:
               GUIInfo(2,__language__(33225)) 
     return(name)

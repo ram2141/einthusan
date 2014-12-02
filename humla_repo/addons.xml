@@ -21,7 +21,7 @@
 </addon>
 <addon id="plugin.video.einthusan"
        name="Einthusan"
-       version="1.0.5"
+       version="1.0.6"
        provider-name="humla">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>

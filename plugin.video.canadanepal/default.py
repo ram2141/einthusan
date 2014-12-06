@@ -12,6 +12,8 @@ from t0mm0.common.net import Net
 ADDON = xbmcaddon.Addon(id='plugin.video.canadanepal')
 NAME = "CanadaNepal"
 
+
+
 # Taken from desitvforum xbmc plugin.
 def GetDomain(url):
     tmp = re.compile('//(.+?)/').findall(url)
@@ -30,7 +32,7 @@ def make_http_get(url):
 def CATEGORIES():
     cwd = xbmcaddon.Addon().getAddonInfo('path')
     img_path = cwd + '/images/'
-    addDir('Latest Videos', 'http://npvideo.com/category/comedy', 1, 'http://canadanepal.info/images/tvprograms.gif')
+    addDir('Latest Videos', 'http://www.ramsarmedia.com/category/meri-bassai/', 1, 'http://canadanepal.info/images/tvprograms.gif')
     addDir('Live TV', cwd + '/resources/live_tv.xml', 6, 'http://canadanepal.info/images/banner/onlinetvf.jpg')
     addDir('Live Radio', 'http://canadanepal.info/fm/',4, 'http://canadanepal.info/images/listenfmlogo.gif')
     addDir('Daily News', 'http://canadanepal.info/dailynews/',7,'http://canadanepal.info/images/banner/samachar20.jpg')
@@ -92,16 +94,19 @@ def clear_htmltags(name):
     result = result.replace('&amp;', '').replace('&nbsp;','')
     return result
 
-# Lists the new episodes of TV series
+##
+# Lists the list of TV series
+# Called when id is 1
+##
 def INDEX(url):
     html = make_http_get(url)
-    match=re.compile('<h4><a href="(.+?)" title=".+?">(.+?)</a></h4>').findall(html)
-    #image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
+    match=re.compile('<a href="(.+?)" rel=bookmark title=".+?" style=background-color:transparent>(.+?)</a>').findall(html)
+    image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     for url,name in match:
         name = name.encode("utf-8")
-        #image_name = name[:4]
-        #image_url = image_base_url + image_name + '.jpg'
-        addDir(name,url,2,'')
+        image_name = name[:4]
+        image_url = image_base_url + image_name + '.jpg'
+        addDir(name,url,2,image_url)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 # Show the list of live tv 
@@ -135,20 +140,27 @@ def get_youtube_link(html):
     match = set(match)  
     return ["http://www.youtube.com/watch?v="+a for a in match]
 
+##
+# Look for blip tv links in a page
+# **** NOT USED ***
+##
 def get_blip_tv_link(html):
     match=re.compile('"(http://(www.)?blip.tv/play/.+?)"').findall(html)
     return [a for a,b in match]
 
+##
+# Look for playwire links in a page 
+##
 def get_playwire_link(html):
-    match = re.compile('data-publisher-id="(.+?)" data-video-id="(.+?)"').findall(html)
-    return [convert_playwire_link(x) for  x in match ]
-
-def convert_playwire_link((publisher, video)):
-    info_link = 'http://cdn.playwire.com/v2/' + publisher + '/config/' + video  +'.json'
-    info = make_http_get(info_link)
-    response_json = json.loads(info)
-    return response_json["src"]
-
+    match = re.compile('http://config.playwire.com/(.+?)/videos/v2/(.+?)/player.json').findall(html)
+    video_link="http://cdn.phoenix.intergi.com/{hosting_id}/videos/{video_id}/{file_link}"
+    video_file="video-sd.mp4"
+    picture_file="poster_0000.png"
+    return [video_link.format(hosting_id=hosting_id, video_id=video_id, file_link=video_file) for (hosting_id, video_id) in match]
+##
+# Get a list of links for a selected tv series
+# Called when id is 2
+##
 def VIDEOLINKS(url,name):
     html = make_http_get(url)    
     match = get_playwire_link(html)
@@ -158,23 +170,23 @@ def VIDEOLINKS(url,name):
         match = get_dailymotion_link(html)
     i = 1
     length = len(match)
-    image_path = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     all_url = ""
+
     for url in match:
         all_url = all_url + url + " "
-        addDir("Part  " + str(i) + " of " + str(length), url, 3, "")
+        addDir( name + ": Part  " + str(i) + " of " + str(length), url, 3, "")
         i = i + 1
     if (i > 2):
-        addDir("Play All", all_url, 3, "");
+        addDir(name + ": Play All", all_url, 3, "");
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-def play_video(url):
+def play_video(url, name):
     all_url = url.split()
     length = len(all_url)
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
     for one_url in all_url:
-        playlist.add(get_stream_url(one_url))
+        playlist.add(get_stream_url(one_url),xbmcgui.ListItem(name))
     player = xbmc.Player(xbmc.PLAYER_CORE_AUTO)
     player.play(playlist)
 
@@ -184,6 +196,10 @@ def get_stream_url(url):
     if domain == "youtube.com":
         stream_url = urlresolver.resolve(url)
     return stream_url
+
+##
+# Getting Hompage stuff
+##
     
 def get_homePageStuff(url):
     html = make_http_get(url)
@@ -316,7 +332,7 @@ elif mode==2:
 elif mode==5:
         AUDIOLINKS(url,name)
 elif mode==3:
-        play_video(url) 
+        play_video(url, name) 
 elif mode==7:
         get_news(url, name)
 elif mode==8:

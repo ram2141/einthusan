@@ -12,8 +12,6 @@ from t0mm0.common.net import Net
 ADDON = xbmcaddon.Addon(id='plugin.video.canadanepal')
 NAME = "CanadaNepal"
 
-
-
 # Taken from desitvforum xbmc plugin.
 def GetDomain(url):
     tmp = re.compile('//(.+?)/').findall(url)
@@ -100,7 +98,7 @@ def clear_htmltags(name):
 ##
 def INDEX(url):
     html = make_http_get(url)
-    match=re.compile('<a href="(.+?)" rel=bookmark title=".+?" style=background-color:transparent>(.+?)</a>').findall(html)
+    match=re.compile('<a href="(.+?)".+?>(.+?)</a></h3>').findall(html)
     image_base_url = xbmcaddon.Addon().getAddonInfo('path') + '/images/'
     for url,name in match:
         name = name.encode("utf-8")

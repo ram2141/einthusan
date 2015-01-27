@@ -16,7 +16,7 @@ do
             if [ $latest_version_number != $repo_version_number ] ; then
                 echo "[UPDATE FOUND]: Updating to version " $latest_version_number
                 rm -rf repo/$plugin/*.zip
-		        git archive --format=zip --prefix=$plugin/ HEAD:$plugin/ > repo/$plugin/$plugin-$latest_version_number.zip
+		        git archive --format=zip --prefix=$plugin/ `git stash create`:$plugin/ > repo/$plugin/$plugin-$latest_version_number.zip
                 cp $plugin/changelog.txt repo/$plugin
             fi
         fi

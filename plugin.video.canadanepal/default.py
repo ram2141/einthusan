@@ -150,7 +150,7 @@ def get_blip_tv_link(html):
 # Look for playwire links in a page 
 ##
 def get_playwire_link(html):
-    match = re.compile('http://config.playwire.com/(.+?)/videos/v2/(.+?)/player.json').findall(html)
+    match = re.compile('http://config.playwire.com/(.+?)/videos/v2/(.+?)/.+?.json').findall(html)
     video_link="http://cdn.phoenix.intergi.com/{hosting_id}/videos/{video_id}/{file_link}"
     video_file="video-sd.mp4"
     picture_file="poster_0000.png"

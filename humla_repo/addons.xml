@@ -2,7 +2,7 @@
 <addons>
 <addon id="plugin.video.canadanepal"
        name="CanadaNepal"
-       version="0.4.9"
+       version="0.5.0"
        provider-name="humla">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>

@@ -41,8 +41,8 @@ def inner_categories(name, url, language, mode, bluray=False):
 
     addDir('A-Z', postData, 8, img_path + 'a_z.png', language)
     addDir('Years', postData, 9, img_path + 'years.png', language)
-    addDir('Actors', postData, 10, img_path + 'actors.png', language)
-    addDir('Director', postData, 11, img_path + 'director.png', language)
+    #addDir('Actors', postData, 10, img_path + 'actors.png', language)
+    #addDir('Director', postData, 11, img_path + 'director.png', language)
     addDir('Recent', postData, 3, img_path + 'recent.png', language)
     addDir('Top Rated', postData, 5, img_path + 'top_rated.png', language)
     if not bluray:

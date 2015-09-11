@@ -41,6 +41,7 @@ def get_options(attr, language):
 	html = HTTPInterface.http_post(API_URL, data=data)
 	result = {}
 	try:
+		print result
 		result = json.loads(html)
 		return result['organize'][attr]['filtered']
 	except KeyError:

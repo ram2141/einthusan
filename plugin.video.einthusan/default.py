@@ -14,7 +14,6 @@ import DBInterface
 
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 
-
 ##
 # Prints the main categories. Called when id is 0.
 ##
@@ -25,6 +24,10 @@ def main_categories(name, url, language, mode):
     addDir('Tamil', '', 7,img_path + 'Tamil_Movies.png', 'tamil')
     addDir('Telugu', '', 7, img_path + 'Telugu_Movies.png', 'telugu')
     addDir('Malayalam', '', 7, img_path + 'Malayalam_Movies.png', 'malayalam')
+    addDir('Kannada', '', 7, img_path + 'kannada.jpg', 'kannada')
+    addDir('Bengali', '', 7, img_path + 'movie.png', 'bengali')
+    addDir('Marathi', '', 7, img_path + 'movie.png', 'marathi')
+    addDir('Punjabi', '', 7, img_path + 'movie.png', 'punjabi')
     addDir('Addon Settings', '', 12, img_path + 'settings.png', '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -41,8 +44,8 @@ def inner_categories(name, url, language, mode, bluray=False):
 
     addDir('A-Z', postData, 8, img_path + 'a_z.png', language)
     addDir('Years', postData, 9, img_path + 'years.png', language)
-    #addDir('Actors', postData, 10, img_path + 'actors.png', language)
-    #addDir('Director', postData, 11, img_path + 'director.png', language)
+    addDir('Actors', postData, 10, img_path + 'actors.png', language)
+    addDir('Director', postData, 11, img_path + 'director.png', language)
     addDir('Recent', postData, 3, img_path + 'recent.png', language)
     addDir('Top Rated', postData, 5, img_path + 'top_rated.png', language)
     if not bluray:

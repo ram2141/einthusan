@@ -1,8 +1,10 @@
-[B]Version 1.2.1[/B]
+<<<<<<< HEAD:repo/plugin.video.einthusan/changelog.txt
+[B]Version 1.2.0[/B]
 - Add Marathi, Bengali, Kannada and Punjabi section
-
+=======
 [B]Version 1.2.0[/B] 
 - Fix default list of years
+>>>>>>> 7a3bb6d5997fa32c8421f70611da079f683f3775:repo/plugin.video.einthusan/changelog-1.2.0.txt
 
 [B]Version 1.0.5[/B] 
 - Add default list of years

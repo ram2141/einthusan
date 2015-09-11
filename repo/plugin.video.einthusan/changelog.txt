@@ -1,5 +1,8 @@
-[B]Version 1.2.0[/B]
+[B]Version 1.2.1[/B]
 - Add Marathi, Bengali, Kannada and Punjabi section
+
+[B]Version 1.2.0[/B] 
+- Fix default list of years
 
 [B]Version 1.0.5[/B] 
 - Add default list of years

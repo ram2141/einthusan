@@ -253,10 +253,7 @@ def http_request_with_login(url):
 def play_video(name, url, language, mode):
     print "Playing: " + name + ", with url:"+ url
     html =  http_request_with_login(url)
-    match = re.compile("'hd-2': { 'file': '(.+?)'").findall(html)
-
-    if (len(match) == 0):
-        match = re.compile("'file': '(.+?)'").findall(html)
+    match = re.compile("setupJwplayer\(\'(http://.+?)\'\)").findall(html)
 
     image_link = language
     if (image_link == ""):

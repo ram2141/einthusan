@@ -252,6 +252,13 @@ def http_request_with_login(url):
 ##
 def play_video(name, url, language, mode):
     print "Playing: " + name + ", with url:"+ url
+
+    location = xbmc.getIPAddress()
+    movie_id = url.split('=')[1]
+
+    cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/hd/' + location 
+    cdn_response = http_request_with_login(cdn_url)
+
     html =  http_request_with_login(url)
     match = re.compile("setupJwplayer\(\'(http://.+?)\'\)").findall(html)
 
@@ -265,11 +272,17 @@ def play_video(name, url, language, mode):
 
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
-    if (len (match) > 0):
+
+    movie_link = match[0]
+    if (len(cdn_response) > 0):
+        print "Playing from cdn response"
+        movie_link = cdn_response
+
+    if (len (movie_link) > 0):
         listitem = xbmcgui.ListItem(name)
         if (image_link != ""):
             listitem.setThumbnailImage(image_link)
-        playlist.add(urllib.unquote(match[0]), listitem)
+        playlist.add(urllib.unquote(movie_link), listitem)
     xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(playlist)
 
 ##

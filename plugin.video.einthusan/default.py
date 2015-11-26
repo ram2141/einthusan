@@ -273,10 +273,13 @@ def play_video(name, url, language, mode):
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
 
-    movie_link = match[0]
+    movie_link = ""
     if (len(cdn_response) > 0):
         print "Playing from cdn response"
         movie_link = cdn_response
+    elif (len(match) > 0):
+        print "Playing from web scraping"
+        movie_link = match[0]
 
     if (len (movie_link) > 0):
         listitem = xbmcgui.ListItem(name)

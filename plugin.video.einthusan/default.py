@@ -259,11 +259,10 @@ def play_video(name, url, language, mode):
     cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/hd/' + location
     if (url.find('bluray') > -1):
         cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/bluray/' + location
-    else:
-        cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/hd/' + location
 
     html =  http_request_with_login(url)
     match = re.compile("setupJwplayer\(\'(http://.+?)\'\)").findall(html)
+    cdn_response = http_request_with_login(cdn_url)
 
     image_link = language
     if (image_link == ""):

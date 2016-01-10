@@ -164,7 +164,7 @@ def show_featured_movies(name, url, language, mode):
     ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
     COOKIE_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
     html = HTTPInterface.http_get(page_url, cookie_file = COOKIE_FILE)
-    matches = re.compile('<a class="movie-cover-wrapper" href="(.+?)"><img src="(.+?)" alt="(.+?)" ').findall(html)
+    matches = re.compile('class="movie-cover-wrapper" .+? href="(.+?)"><img src="(.+?)" alt="(.+?)"').findall(html)
 
     BASE_URL = 'http://www.einthusan.com/'
     for link, image, name in matches:

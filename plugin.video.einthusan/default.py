@@ -28,6 +28,7 @@ def main_categories(name, url, language, mode):
     addDir('Bengali', '', 7, img_path + 'movie.png', 'bengali')
     addDir('Marathi', '', 7, img_path + 'movie.png', 'marathi')
     addDir('Punjabi', '', 7, img_path + 'movie.png', 'punjabi')
+    addDir('Gujarati', '', 7, img_path + 'movie.png', 'gujarati')
     addDir('Addon Settings', '', 12, img_path + 'settings.png', '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 

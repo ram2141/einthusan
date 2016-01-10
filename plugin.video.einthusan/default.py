@@ -288,7 +288,7 @@ def play_video(name, url, language, mode):
         if (image_link != ""):
             listitem.setThumbnailImage(image_link)
         playlist.add(urllib.unquote(movie_link), listitem)
-    xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(playlist)
+    xbmc.Player().play(playlist)
 
 ##
 # Displays the setting view. Called when mode is 12

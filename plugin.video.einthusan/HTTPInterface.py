@@ -9,13 +9,14 @@ def http_get(url, cookie_file='',username='', password =''):
         form_data = {}
         form_data['username'] = username
         form_data['password'] = password
-        login_url = "http://www.einthusan.com/etc/login.php"
+        login_url = 'http://www.einthusan.com/etc/login.php'
         http_post(login_url, postData=form_data)
         
     try:
-        return Net().http_GET(url).content
+        header = {'Referer':'http://www.einthusan.com/'}
+        return Net().http_GET(url,header).content
     except urllib2.URLError, e:
-        return ""
+        return ''
 
 def http_post(url, cookie_file='', postData={}, data=''):
     try:
@@ -24,4 +25,4 @@ def http_post(url, cookie_file='', postData={}, data=''):
         net = Net(cookie_file=cookie_file)
         return net.http_POST(url,postData).content
     except urllib2.URLError, e:
-        return ""
+        return ''

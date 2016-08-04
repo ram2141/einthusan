@@ -253,7 +253,8 @@ def http_request_with_login(url):
 def play_video(name, url, language, mode):
     print "Playing: " + name + ", with url:"+ url
 
-    location = xbmc.getIPAddress()
+    #location = xbmc.getIPAddress()
+    location = 'Sydney%2CSan%2CDallas%2CWashington%2CToronto%2CLondon/'
     movie_id = url.split('=')[-1] # ensures id field selected even in bluray links
 
     cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/hd/' + location
@@ -275,13 +276,16 @@ def play_video(name, url, language, mode):
     playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
     playlist.clear()
 
-    movie_link = ""
+    movie_link = ''
+    header_link = '|Referer=http://www.einthusan.com/jwplayer-7.5.0-beta.2/jwplayer.flash.swf' + \
+                  '&User-Agent=Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 ' + \
+                  '(KHTML, like Gecko) Chrome/13.0.782.99 Safari/535.1'
     if (len(cdn_response) > 0):
-        print "Playing from cdn response"
-        movie_link = cdn_response
+        print 'Playing from cdn response'
+        movie_link = cdn_response + header_link
     elif (len(match) > 0):
-        print "Playing from web scraping"
-        movie_link = match[0]
+        print 'Playing from web scraping'
+        movie_link = match[0] + header_link
 
     if (len (movie_link) > 0):
         listitem = xbmcgui.ListItem(name)

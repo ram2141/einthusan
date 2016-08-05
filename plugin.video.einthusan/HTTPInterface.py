@@ -13,7 +13,8 @@ def http_get(url, cookie_file='',username='', password =''):
         http_post(login_url, postData=form_data)
         
     try:
-        header = {'Referer':'http://www.einthusan.com/'}
+        header = {'Referer':'http://www.einthusan.com/',
+                  'Origin':'http://www.einthusan.com/'}
         return Net().http_GET(url,header).content
     except urllib2.URLError, e:
         return ''

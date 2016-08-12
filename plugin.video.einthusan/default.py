@@ -13,7 +13,9 @@ import JSONInterface
 import DBInterface
 
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
-
+locationid = xbmcplugin.getSetting(int(sys.argv[1]), 'location')
+Locations = ['San', 'Washington', 'Dallas', 'Toronto', 'London', 'Sydney']
+location = Locations[int(locationid)]
 ##
 # Prints the main categories. Called when id is 0.
 ##
@@ -254,12 +256,12 @@ def play_video(name, url, language, mode):
     print "Playing: " + name + ", with url:"+ url
 
     #location = xbmc.getIPAddress()
-    location = 'Sydney%2CSan%2CDallas%2CWashington%2CToronto%2CLondon/'
+    #location = 'Sydney%2CSan%2CDallas%2CWashington%2CToronto%2CLondon/'
     movie_id = url.split('=')[-1] # ensures id field selected even in bluray links
 
-    cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/hd/' + location
+    cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/hd/' + location + '/'
     if (url.find('bluray') > -1):
-        cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/bluray/' + location
+        cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/bluray/' + location + '/'
 
     html =  http_request_with_login(url)
     match = re.compile("setupJwplayer\(\'(http://.+?)\'\)").findall(html)

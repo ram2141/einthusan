@@ -14,8 +14,11 @@ import DBInterface
 
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 locationid = xbmcplugin.getSetting(int(sys.argv[1]), 'location')
-Locations = ['San', 'Washington', 'Dallas', 'Toronto', 'London', 'Sydney']
+Locations = ['San', 'Dallas', 'Washington', 'Toronto', 'London', 'Sydney']
 location = Locations[int(locationid)]
+for x in range(0, 6):
+    if x != int(locationid):
+        location = location + '%2C' + Locations[x]
 ##
 # Prints the main categories. Called when id is 0.
 ##
@@ -257,6 +260,7 @@ def play_video(name, url, language, mode):
 
     #location = xbmc.getIPAddress()
     #location = 'Sydney%2CSan%2CDallas%2CWashington%2CToronto%2CLondon/'
+
     movie_id = url.split('=')[-1] # ensures id field selected even in bluray links
 
     cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/hd/' + location + '/'

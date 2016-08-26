@@ -264,8 +264,10 @@ def play_video(name, url, language, mode):
     movie_id = url.split('=')[-1] # ensures id field selected even in bluray links
 
     cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/hd/' + location + '/'
-    if (url.find('bluray') > -1):
+    if 'bluray' in url:
         cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/bluray/' + location + '/'
+    elif 'music' in url:
+        cdn_url = 'http://cdn.einthusan.com/musicvideogeturl/' + movie_id + '/' + location + '/'
 
     html =  http_request_with_login(url)
     match = re.compile("setupJwplayer\(\'(http://.+?)\'\)").findall(html)

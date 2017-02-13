@@ -47,17 +47,17 @@ def inner_categories(name, url, language, mode, bluray=False):
     if bluray:
         postData = 'lang=' + language + '&bluray=1&'
 
-    addDir('A-Z', postData, 8, img_path + 'a_z.png', language)
-    addDir('Years', postData, 9, img_path + 'years.png', language)
-    addDir('Actors', postData, 10, img_path + 'actors.png', language)
-    addDir('Director', postData, 11, img_path + 'director.png', language)
-    addDir('Recent', postData, 3, img_path + 'recent.png', language)
-    addDir('Top Rated', postData, 5, img_path + 'top_rated.png', language)
+    #addDir('A-Z', postData, 8, img_path + 'a_z.png', language)
+    #addDir('Years', postData, 9, img_path + 'years.png', language)
+    #addDir('Actors', postData, 10, img_path + 'actors.png', language)
+    #addDir('Director', postData, 11, img_path + 'director.png', language)
+    #addDir('Recent', postData, 3, img_path + 'recent.png', language)
+    #addDir('Top Rated', postData, 5, img_path + 'top_rated.png', language)
     if not bluray:
         addDir('Featured', '', 4, img_path + 'featured_videos.png', language)
-        addDir('Blu-Ray', '', 13, img_path + 'Bluray.png', language)
-        addDir('Search', postData, 6, img_path + 'Search_by_title.png', language)
-        addDir('Music Video', '' , 14, img_path + 'music_videos.png', language)
+        #addDir('Blu-Ray', '', 13, img_path + 'Bluray.png', language)
+        #addDir('Search', postData, 6, img_path + 'Search_by_title.png', language)
+        #addDir('Music Video', '' , 14, img_path + 'music_videos.png', language)
         #addDir('Mp3 Music', '', 16, '', language)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -163,16 +163,26 @@ def show_recent_sections(name, url, language, mode):
 
 # Shows the movie in the homepage..
 def show_featured_movies(name, url, language, mode):
-    page_url = 'http://www.einthusan.com/index.php?lang=' + language
+    page_url = 'https://einthusan.tv/movie/browse/?lang=' + language
 
     ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
     COOKIE_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
     html = HTTPInterface.http_get(page_url, cookie_file = COOKIE_FILE)
-    matches = re.compile('class="movie-cover-wrapper" .+? href="(.+?)"><img src="(.+?)" alt="(.+?)"').findall(html)
 
-    BASE_URL = 'http://www.einthusan.com/'
-    for link, image, name in matches:
-        addDir(name, BASE_URL + link, 2, BASE_URL + image, language)
+    matches = re.compile('<img src="//s3.amazonaws.com/einthusanthunderbolt/moviecovers/(.+?).(png|jpg)">').findall(html)
+
+    titlematches1 = re.compile('<h2>(.+?)</h2></a><div class="info">').findall(html)
+    titlematches2 = re.compile('class="title">(.+?)</a>').findall(html)
+    titles = titlematches1 + titlematches2
+
+    LINK_BASE_URL = 'https://einthusan.tv/movie/watch/'
+    IMAGE_BASE_URL = 'https://s3.amazonaws.com/einthusanthunderbolt/moviecovers/'
+
+    for movieTitle,(imageId,imgExt) in zip(titles, matches):
+        movieId = imageId.split("-")[0]
+        link = LINK_BASE_URL + movieId + '/?lang=' + language
+        image = IMAGE_BASE_URL + imageId + "." + imgExt 
+        addDir(movieTitle, link , 2, image, language)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 ##

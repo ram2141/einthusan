@@ -12,13 +12,15 @@ import HTTPInterface
 import JSONInterface
 import DBInterface
 
+import requests
+
+# s = requests.Session()
+
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
-locationid = xbmcplugin.getSetting(int(sys.argv[1]), 'location')
-Locations = ['San', 'Dallas', 'Washington', 'Toronto', 'London', 'Sydney']
-location = Locations[int(locationid)]
-for x in range(0, 6):
-    if x != int(locationid):
-        location = location + '%2C' + Locations[x]
+username = ADDON.getSetting('username')
+password = ADDON.getSetting('password')
+        
+BASE_URL='https://einthusan.tv'
 ##
 # Prints the main categories. Called when id is 0.
 ##
@@ -43,21 +45,21 @@ def inner_categories(name, url, language, mode, bluray=False):
     cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/' 
 
-    postData = 'lang=' + language + '&'
+    postData = 'lang=' + language
     if bluray:
         postData = 'lang=' + language + '&bluray=1&'
 
-    #addDir('A-Z', postData, 8, img_path + 'a_z.png', language)
-    #addDir('Years', postData, 9, img_path + 'years.png', language)
-    #addDir('Actors', postData, 10, img_path + 'actors.png', language)
-    #addDir('Director', postData, 11, img_path + 'director.png', language)
-    #addDir('Recent', postData, 3, img_path + 'recent.png', language)
-    #addDir('Top Rated', postData, 5, img_path + 'top_rated.png', language)
+    addDir('A-Z', postData, 8, img_path + 'a_z.png', language)
+    addDir('Years', postData, 9, img_path + 'years.png', language)
+    #addDir('[COLOR red]Actors[/COLOR]', postData, 10, img_path + 'actors.png', language)
+    #addDir('[COLOR red]Director[/COLOR]', postData, 11, img_path + 'director.png', language)
+    addDir('Recent', postData, 3, img_path + 'recent.png', language)
+    #addDir('[COLOR red]Top Rated[/COLOR]', postData, 5, img_path + 'top_rated.png', language)
     if not bluray:
         addDir('Featured', '', 4, img_path + 'featured_videos.png', language)
-        #addDir('Blu-Ray', '', 13, img_path + 'Bluray.png', language)
-        #addDir('Search', postData, 6, img_path + 'Search_by_title.png', language)
-        #addDir('Music Video', '' , 14, img_path + 'music_videos.png', language)
+        #addDir('[COLOR red]Blu-Ray[/COLOR]', '', 13, img_path + 'Bluray.png', language)
+        addDir('Search', postData, 6, img_path + 'Search_by_title.png', language)
+        #addDir('[COLOR red]Music Video[/COLOR]', '' , 14, img_path + 'music_videos.png', language)
         #addDir('Mp3 Music', '', 16, '', language)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -71,27 +73,34 @@ def display_BluRay_listings(name, url, language, mode):
 #  Scrapes a list of movies and music videos from the website. Called when mode is 1.
 ##
 def get_movies_and_music_videos(name, url, language, mode):
-    ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
-    COOKIE_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
+    
+    referurl = url
+    html =  requests.get(url).text
+    # match = re.compile('<div class="block1">.*?href=".*?watch\/(.*?)\/\?lang=(.*?)".*?src="(.*?)".*?<h3>(.*?)</h3>.+?i class(.+?)<p').findall(html)
+    match = re.compile('<div class="block1">.*?href=".*?watch\/(.*?)\/\?lang=(.*?)".*?src="(.*?)".*?<h3>(.*?)</h3>.+?i class(.+?)<p.+?<span>Wiki</span>(.+?)</div>').findall(html)
+    nextpage=re.findall('data-disabled="([^"]*)" href="(.+?)"', html)[-1]
 
-    html =  HTTPInterface.http_get(url, cookie_file=COOKIE_FILE)
-    match = re.compile('<div class="(video|music)-object-thumb"><a href="(.+?)">(.+?<a class="movie-cover-wrapper".+?>)?<img src="(.+?)" alt="(.+?)"').findall(html)
 
     # Bit of a hack
-    MOVIES_URL = "http://www.einthusan.com/movies/"
-    for _, page_link, _, image, name in match:
+    MOVIES_URL = "http://www.einthusan.tv/movies/watch/"
+    for movie, lang, image, name, ishd, trailer in match:
         if (mode == 1):
-            image = MOVIES_URL + image
-        addDir(name, MOVIES_URL + page_link, 2, image, image)
+            image = 'http:' + image
+            movie = str(name)+','+str(movie)+','+lang+','
+            if 'ultrahd' in ishd:
+                name = name + '[COLOR blue]- Ultra HD[/COLOR]'
+                movie = movie+'itshd,'+referurl
+            else:
+                movie = movie+'itsnothd,'+referurl
+            if 'youtube' in trailer: trail = trailer.split('watch?v=')[1].split('">')[0]
+            else: trail=None
+        # addDir(name, MOVIES_URL + str(movie)+'/?lang='+lang, 2, image, lang)
+        addDir(name,movie,2,image,lang,trail, isplayable=True)
+    if nextpage[0]!='true':
+        addDir('>>> Next Page >>>', BASE_URL+nextpage[1],1,'','')
 
-    numerical_nav = re.compile('<div class="numerical-nav">(.+?)</div>').findall(html)
-
-    if (len(numerical_nav) > 0):
-        next_page = re.compile('<a class="numerical-nav-selected" href=".+?">.+?</a><a href=".+?">(.+?)</a>').findall(numerical_nav[0])
-        if (len(next_page) == 1):
-            addDir("Next >>", url + "&page=" + next_page[0], mode, "http://www.sahara.co.za/Images/next.jpg", '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
-
+    # s.close()
 
 ##
 # Displays the menu for mp3 music..
@@ -156,34 +165,34 @@ def show_recent_sections(name, url, language, mode):
     cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/' 
 
-    postData = url + '&organize=Activity&filtered='
-    addDir('Recently Posted',  postData + 'RecentlyPosted', 15, img_path + 'recently_added.png')
-    addDir('Recently Viewed', postData + 'RecentlyViewed', 15, img_path + 'recently_viewed.png')
+    postData = 'https://einthusan.tv/movie/results/?'+url + '&find='
+    addDir('Recently Posted',  postData + 'Recent', 1, img_path + 'recently_added.png')
+    addDir('[COLOR red]Recently Viewed[/COLOR]', postData + 'RecentlyViewed', 15, img_path + 'recently_viewed.png')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 # Shows the movie in the homepage..
 def show_featured_movies(name, url, language, mode):
     page_url = 'https://einthusan.tv/movie/browse/?lang=' + language
 
-    ADDON_USERDATA_FOLDER = xbmc.translatePath(ADDON.getAddonInfo('profile'))
-    COOKIE_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
-    html = HTTPInterface.http_get(page_url, cookie_file = COOKIE_FILE)
+    html = requests.get(page_url).text
+    matches = re.compile('name="newrelease_tab".+?img src="(.+?)".+?href="(.+?)"><h2>(.+?)</h2>.+?i class=(.+?)</div>').findall(html)
+    
+    for img, id, name, ishd in matches:
+        movieid = id.split('/')[3]
+        movielang= id.split('lang=')[1]
+        movie = name+','+movieid+','+movielang
+        if 'ultrahd' in ishd:
+            title=name + '[COLOR blue]- Ultra HD[/COLOR]'
+            movie = movie+',itshd,'+page_url
+        else:
+            title=name
+            movie = movie+',itsnothd,'+page_url
+        link = 'http://www.einthusan.tv'+str(id)
+        image = 'http:'+img
 
-    matches = re.compile('<img src="//s3.amazonaws.com/einthusanthunderbolt/moviecovers/(.+?).(png|jpg)">').findall(html)
-
-    titlematches1 = re.compile('<h2>(.+?)</h2></a><div class="info">').findall(html)
-    titlematches2 = re.compile('class="title">(.+?)</a>').findall(html)
-    titles = titlematches1 + titlematches2
-
-    LINK_BASE_URL = 'https://einthusan.tv/movie/watch/'
-    IMAGE_BASE_URL = 'https://s3.amazonaws.com/einthusanthunderbolt/moviecovers/'
-
-    for movieTitle,(imageId,imgExt) in zip(titles, matches):
-        movieId = imageId.split("-")[0]
-        link = LINK_BASE_URL + movieId + '/?lang=' + language
-        image = IMAGE_BASE_URL + imageId + "." + imgExt 
-        addDir(movieTitle, link , 2, image, language)
+        addDir(title, movie, 2, image, language, isplayable=True)
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
+    # s.close()
 
 ##
 # Displays the options for Top Rated. Called when id is 5.
@@ -192,7 +201,7 @@ def show_top_rated_options(name, url, language, mode):
     cwd = ADDON.getAddonInfo('path')
     img_path = cwd + '/images/' 
 
-    postData = url + '&organize=Rating&filtered='
+    postData = url + '&find=Rating&filtered='
     addDir('Romance', postData + 'Romance', 15, img_path + 'romance.png')
     addDir('Comedy', postData + 'Comedy', 15, img_path + 'comedy.png')
     addDir('Action', postData + 'Action', 15, img_path + 'action.png')
@@ -204,13 +213,13 @@ def show_top_rated_options(name, url, language, mode):
 # Displays the options for A-Z view. Called when id is 8.
 ##
 def show_A_Z(name, url, language, mode):
+    
     azlist = map (chr, range(65,91))
-    postData = url + "&organize=Alphabetical&filtered="
-    addDir('Numerical', postData + 'Numerical', 15, '')
+    # postData = 'https://einthusan.tv/movie/results/?'+url + "find=Alphabets&alpha="
+    addDir('Numerical', 'https://einthusan.tv/movie/results/?find=Numbers&'+url, 1, '')
     for letter in azlist:
-        addDir(letter, postData + letter, 15, '')
+        addDir(letter, 'https://einthusan.tv/movie/results/?alpha='+letter+'&find=Alphabets&'+url, 1, '')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
-
 ##
 # Single method that shows the list of years, actors and directors. 
 # Called when id is 9, 10, 11
@@ -220,9 +229,8 @@ def show_A_Z(name, url, language, mode):
 ## 
 def show_list(name, b_url, language, mode):
     if (mode == 9):
-        postData = b_url + 'organize=Year'
-        values = JSONInterface.get_year_list(language) or \
-            [repr(x) for x in reversed(range(1950, date.today().year + 1))]
+        postData = b_url + 'find=Year&year='
+        values = [repr(x) for x in reversed(range(1940, date.today().year + 1))]
     elif (mode == 10):
         postData = b_url + 'organize=Cast'
         values = JSONInterface.get_actor_list(language)
@@ -230,11 +238,11 @@ def show_list(name, b_url, language, mode):
         postData = b_url + 'organize=Director'
         values = JSONInterface.get_director_list(language)
 
-    postData = postData + '&filtered='
+    # postData = postData + '&filtered='
 
     for attr_value in values:
         if (attr_value != None):
-            addDir(attr_value, postData + attr_value, 15, '')
+            addDir(attr_value, BASE_URL+'/movie/results/?'+postData + str(attr_value), 1, '')
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -242,9 +250,32 @@ def show_list(name, b_url, language, mode):
 # Shows the search box for serching. Shown when the id is 6.
 ##
 def show_search_box(name, url, language, mode):
-    search_term = GUIEditExportName("")
-    postData = url + 'search=' + search_term
-    list_movies_from_JSON_API(name, postData, language, 15)
+    # search_term = GUIEditExportName("")
+    keyb = xbmc.Keyboard('', 'Search for Movies')
+    keyb.doModal()
+    if (keyb.isConfirmed()):
+        search_term = urllib.quote_plus(keyb.getText()) 
+        postData = 'https://einthusan.tv/movie/results/?'+url+'&query=' + search_term
+        headers={'Origin':'https://einthusan.tv','Referer':'https://einthusan.tv/movie/browse/?'+url,'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'}
+        html = requests.get(postData, headers=headers).text
+        match = re.compile('<div class="block1">.*?href=".*?watch\/(.*?)\/\?lang=(.*?)".*?src="(.*?)".*?<h3>(.*?)</h3>.+?i class(.+?)<p').findall(html)
+        nextpage=re.findall('data-disabled="([^"]*)" href="(.+?)"', html)[-1]
+
+        for movie, lang, image, name, ishd in match:
+            image = 'http:' + image
+            movie = str(name)+','+str(movie)+','+lang+','
+            if 'ultrahd' in ishd:
+                name = name + '[COLOR blue]- Ultra HD[/COLOR]'
+                movie = movie+'itshd,'+postData
+            else:
+                movie = movie+'itsnothd,'+postData
+            # addDir(name, MOVIES_URL + str(movie)+'/?lang='+lang, 2, image, lang)
+            
+            addDir(name,movie,2,image,lang, isplayable=True)
+        if nextpage[0]!='true':
+            addDir('>>> Next Page >>>', BASE_URL+nextpage[1],1,'','')
+
+    xbmcplugin.endOfDirectory(int(sys.argv[1]), cacheToDisc=True)
 
 ##
 #  Displays a list of music videos
@@ -262,56 +293,112 @@ def http_request_with_login(url):
     COOKIE_FILE = os.path.join(ADDON_USERDATA_FOLDER, 'cookies')
     return HTTPInterface.http_get(url, COOKIE_FILE,username, password)
 
+def decodeEInth(lnk):
+    t=10
+    #var t=10,r=e.slice(0,t)+e.slice(e.length-1)+e.slice(t+2,e.length-1)
+    r=lnk[0:t]+lnk[-1]+lnk[t+2:-1]
+    return r
+def encodeEInth(lnk):
+    t=10
+    #var t=10,r=e.slice(0,t)+e.slice(e.length-1)+e.slice(t+2,e.length-1)
+    r=lnk[0:t]+lnk[-1]+lnk[t+2:-1]
+    return r
+    
 ##
 # Plays the video. Called when the id is 2.
 ##
 def play_video(name, url, language, mode):
-    print "Playing: " + name + ", with url:"+ url
+    
+    s = requests.Session()
+    
+    # "Playing: " + name + ", with url:"+ url)
+    
+    name,url,lang,isithd,referurl=url.split(',')
+    
+    if isithd=='itshd':
+        dialog = xbmcgui.Dialog()
+        ret = dialog.select('Quality Options', ['Play UHD', 'Play HD/SD'])
+        
+        if ret ==0:
+            # isithd = 'itshd'
+            headers={'Origin':'https://einthusan.tv','Referer':'https://einthusan.tv/movie/browse/?lang=hindi','User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'}
+            mainurl='https://einthusan.tv/movie/watch/%s/?lang=%s&uhd=true'%(url,lang)
+            mainurlajax='https://einthusan.tv/ajax/movie/watch/%s/?lang=%s&uhd=true'%(url,lang)
+            login_info(s, referurl)
+            get_movie(s,mainurl,mainurlajax, headers)
+        if ret ==1:
+            # isithd = 'itsnothd'
+            mainurl='https://einthusan.tv/movie/watch/%s/?lang=%s'%(url,lang)
+            mainurlajax='https://einthusan.tv/ajax/movie/watch/%s/?lang=%s'%(url,lang)
+            headers={'Origin':'https://einthusan.tv','Referer':'https://einthusan.tv/movie/browse/?lang=hindi','User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'}
+            get_movie(s,mainurl,mainurlajax, headers)
+    else:
+        mainurl='https://einthusan.tv/movie/watch/%s/?lang=%s'%(url,lang)
+        mainurlajax='https://einthusan.tv/ajax/movie/watch/%s/?lang=%s'%(url,lang)
+        headers={'Origin':'https://einthusan.tv','Referer':'https://einthusan.tv/movie/browse/?lang=hindi','User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'}
+        get_movie(s,mainurl,mainurlajax, headers)
+        
+    xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-    #location = xbmc.getIPAddress()
-    #location = 'Sydney%2CSan%2CDallas%2CWashington%2CToronto%2CLondon/'
+def get_movie(s, mainurl, mainurlajax, headers=None):
+    import HTMLParser
+    import json
+    # htm=getUrl(mainurl,headers=headers,cookieJar=cookieJar)
+    
+    
+    htm=s.get(mainurl, headers=headers, cookies=s.cookies).text.encode('utf-8')
+    # htm, level=OTICE)
+    lnk=re.findall('data-ejpingables=["\'](.*?)["\']',htm)[0]
 
-    movie_id = url.split('=')[-1] # ensures id field selected even in bluray links
+    r=decodeEInth(lnk)
+    jdata='{"EJOutcomes":"%s","NativeHLS":false}'%lnk
 
-    cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/hd/' + location + '/'
-    if 'bluray' in url:
-        cdn_url = 'http://cdn.einthusan.com/geturl/' + movie_id + '/bluray/' + location + '/'
-    elif 'music' in url:
-        cdn_url = 'http://cdn.einthusan.com/musicvideogeturl/' + movie_id + '/' + location + '/'
+    h = HTMLParser.HTMLParser()
+    gid=re.findall('data-pageid=["\'](.*?)["\']',htm)[0]
+    
+    gid=h.unescape(gid).encode("utf-8") 
 
-    html =  http_request_with_login(url)
-    match = re.compile("setupJwplayer\(\'(http://.+?)\'\)").findall(html)
-    cdn_response = http_request_with_login(cdn_url)
+    postdata={'xEvent':'UIVideoPlayer.PingOutcome','xJson':jdata,'arcVersion':'3','appVersion':'59','gorilla.csrf.Token':gid}
+    
+    rdata=s.post(mainurlajax,headers=headers,data=postdata,cookies=s.cookies).text
+    
+    r=json.loads(rdata)["Data"]["EJLinks"]
 
-    image_link = language
-    if (image_link == ""):
-        thumbnail_match = re.compile('<img src="(../images.+?)"').findall(html)
-        if (len (thumbnail_match) > 0):
-            # Bit of a hack again
-            MOVIES_URL = "http://www.einthusan.com/movies/"
-            image_link = MOVIES_URL + thumbnail_match[0]
-
-    playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
-    playlist.clear()
-
-    movie_link = ''
-    header_link = '|Referer=http://www.einthusan.com/jwplayer-7.5.0-beta.2/jwplayer.flash.swf' + \
-                  '&User-Agent=Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 ' + \
-                  '(KHTML, like Gecko) Chrome/13.0.782.99 Safari/535.1'
-    if (len(cdn_response) > 0):
-        print 'Playing from cdn response'
-        movie_link = cdn_response + header_link
-    elif (len(match) > 0):
-        print 'Playing from web scraping'
-        movie_link = match[0] + header_link
-
-    if (len (movie_link) > 0):
-        listitem = xbmcgui.ListItem(name)
-        if (image_link != ""):
-            listitem.setThumbnailImage(image_link)
-        playlist.add(urllib.unquote(movie_link), listitem)
-    xbmc.Player().play(playlist)
-
+    lnk=json.loads(decodeEInth(r).decode("base64"))["HLSLink"]
+      
+    urlnew=lnk+('|https://einthusan.tv&Referer=%s&User-Agent=%s'%(mainurl,'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'))
+    listitem = xbmcgui.ListItem( label = str(name), iconImage = "DefaultVideo.png", thumbnailImage = xbmc.getInfoImage( "ListItem.Thumb" ) )
+    
+    # listitem =xbmcgui.ListItem(name)
+    listitem.setProperty('IsPlayable', 'true')
+    listitem.setPath(urlnew)
+    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+    
+    s.close()
+    # xbmcplugin.endOfDirectory(int(sys.argv[1]))
+    
+def login_info(s, referurl):
+    
+    headers={'Host':'einthusan.tv', 'Origin':'https://einthusan.tv','Referer':referurl,'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
+    
+    htm = s.get('https://einthusan.tv/login/?lang=hindi', headers=headers, allow_redirects=False).content
+    csrf=re.findall('data-pageid=["\'](.*?)["\']',htm)[0]
+    if '&#43;' in csrf: csrf = csrf.replace('&#43;', '+')
+    
+    body = {'xEvent':'Login','xJson':'{"Email":"'+username+'","Password":"'+password+'"}', 'arcVersion':3, 'appVersion':59,'tabID':csrf+'48','gorilla.csrf.Token':csrf}
+    headers['X-Requested-With']='XMLHttpRequest'
+    
+    
+    headers['Referer']='https://einthusan.tv/login/?lang=hindi'
+    html2= s.post('https://einthusan.tv/ajax/login/?lang=hindi',headers=headers,cookies=s.cookies, data=body,allow_redirects=False) 
+    
+    html3=s.get('https://einthusan.tv/account/?flashmessage=success%3A%3A%3AYou+are+now+logged+in.&lang=hindi', headers=headers, cookies=s.cookies)
+    
+    csrf3 = re.findall('data-pageid=["\'](.*?)["\']',html3.text)[0]
+    body4 = {'xEvent':'notify','xJson':'{"Alert":"SUCCESS","Heading":"AWESOME!","Line1":"You+are+now+logged+in.","Buttons":[]}', 'arcVersion':3, 'appVersion':59,'tabID':csrf+'48','gorilla.csrf.Token':csrf3}
+    html4 = s.post('https://einthusan.tv/ajax/account/?lang=hindi', headers=headers, cookies=s.cookies, data=body4)
+    
+    return s
 ##
 # Displays the setting view. Called when mode is 12
 ##
@@ -359,8 +446,20 @@ def GUIEditExportName(name):
               name = kb.getText()
               exit = False
           else:
-              GUIInfo(2,__language__(33225)) 
+              break
     return(name)
+    
+def playtrailer( name,url,language,mode ):
+    # dialog.notification( addon.get_name(), 'fetching trailer', addon.get_icon(), 4000)
+    trail = 'plugin://plugin.video.youtube/play/?videoid='+url
+    xbmc.log(trail, level=xbmc.LOGNOTICE)
+    # xbmc.log(sys.argv[0], level=xbmc.LOGNOTICE)
+    # xbmc.log(sys.argv[1], level=xbmc.LOGNOTICE)
+    listitem = xbmcgui.ListItem(name)
+    listitem.setPath(url)
+    xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, listitem)
+    # xbmc.Player().play(url, listitem)
+    # sys.exit()
 
 def addLink(name,url,iconimage):
     liz=xbmcgui.ListItem(name, iconImage="DefaultVideo.png", thumbnailImage=iconimage)
@@ -369,12 +468,16 @@ def addLink(name,url,iconimage):
     return ok
 
 
-def addDir(name, url, mode, iconimage, lang=''):
+def addDir(name, url, mode, iconimage, lang='', trail=None, isplayable=False):
     u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"&name="+urllib.quote_plus(name)+"&lang="+urllib.quote_plus(lang)
+    
     liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png", thumbnailImage=iconimage)
     liz.setInfo( type="Video", infoLabels={ "Title": name } )
     liz.setProperty('IsPlayable', 'true')
-    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
+    isfolder=True
+    if isplayable:
+        isfolder=False
+    ok=xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=isfolder)
     return ok
 
 params=get_params()

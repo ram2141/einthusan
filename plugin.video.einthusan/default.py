@@ -167,7 +167,7 @@ def show_recent_sections(name, url, language, mode):
 
     postData = 'https://einthusan.tv/movie/results/?'+url + '&find='
     addDir('Recently Posted',  postData + 'Recent', 1, img_path + 'recently_added.png')
-    addDir('[COLOR red]Recently Viewed[/COLOR]', postData + 'RecentlyViewed', 15, img_path + 'recently_viewed.png')
+    #addDir('[COLOR red]Recently Viewed[/COLOR]', postData + 'RecentlyViewed', 15, img_path + 'recently_viewed.png')
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
 # Shows the movie in the homepage..

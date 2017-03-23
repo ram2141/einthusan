@@ -19,6 +19,10 @@ import requests
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 username = ADDON.getSetting('username')
 password = ADDON.getSetting('password')
+
+locationid = xbmcplugin.getSetting(int(sys.argv[1]), 'location')
+Locations = ['San Francisco', 'Dallas', 'Washington D.C', 'Toronto', 'London', 'Sydney', 'No Preference']
+location = Locations[int(locationid)]
         
 BASE_URL='https://einthusan.tv'
 ##
@@ -73,7 +77,7 @@ def display_BluRay_listings(name, url, language, mode):
 #  Scrapes a list of movies and music videos from the website. Called when mode is 1.
 ##
 def get_movies_and_music_videos(name, url, language, mode):
-    
+    xbmc.log(url, level=xbmc.LOGNOTICE)
     referurl = url
     html =  requests.get(url).text
     # match = re.compile('<div class="block1">.*?href=".*?watch\/(.*?)\/\?lang=(.*?)".*?src="(.*?)".*?<h3>(.*?)</h3>.+?i class(.+?)<p').findall(html)
@@ -229,13 +233,13 @@ def show_A_Z(name, url, language, mode):
 ## 
 def show_list(name, b_url, language, mode):
     if (mode == 9):
-        postData = b_url + 'find=Year&year='
+        postData = b_url + '&find=Year&year='
         values = [repr(x) for x in reversed(range(1940, date.today().year + 1))]
     elif (mode == 10):
-        postData = b_url + 'organize=Cast'
+        postData = b_url + '&organize=Cast'
         values = JSONInterface.get_actor_list(language)
     else:
-        postData = b_url + 'organize=Director'
+        postData = b_url + '&organize=Director'
         values = JSONInterface.get_director_list(language)
 
     # postData = postData + '&filtered='
@@ -363,8 +367,12 @@ def get_movie(s, mainurl, mainurlajax, headers=None):
     rdata=s.post(mainurlajax,headers=headers,data=postdata,cookies=s.cookies).text
     
     r=json.loads(rdata)["Data"]["EJLinks"]
-
+    xbmc.log(str(decodeEInth(r).decode("base64")), level=xbmc.LOGNOTICE)
     lnk=json.loads(decodeEInth(r).decode("base64"))["HLSLink"]
+	
+    lnk = preferred_server(lnk, mainurl)
+			
+    xbmc.log(lnk, level=xbmc.LOGNOTICE)
       
     urlnew=lnk+('|https://einthusan.tv&Referer=%s&User-Agent=%s'%(mainurl,'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'))
     listitem = xbmcgui.ListItem( label = str(name), iconImage = "DefaultVideo.png", thumbnailImage = xbmc.getInfoImage( "ListItem.Thumb" ) )
@@ -377,6 +385,41 @@ def get_movie(s, mainurl, mainurlajax, headers=None):
     s.close()
     # xbmcplugin.endOfDirectory(int(sys.argv[1]))
     
+def preferred_server(lnk, mainurl):
+	xbmc.log(location, level=xbmc.LOGNOTICE)
+	if location != 'No Preference':
+		if location == 'Dallas':
+			servers = [23,24,25,29,30,31,35,36,37,38,45]
+		elif location == 'Washington D.C':
+			servers = [1,2,3,4,5,6,7,8,9,10,11,13,41,44]
+		elif location == 'San Francisco':
+			servers = [19,20,21,22,46]
+		elif location == 'Toronto':
+			servers = [26,27]
+		elif location == 'London':
+			servers = [14,15,16,17,18,32,33,39,40,42]
+		else: # location == 'Sydney'
+			servers = [28,34,43]
+			
+		server_n = lnk.split('.einthusan.tv')[0].strip('https://s')
+		SERVER_OFFSET = []
+		if int(server_n) > 100:
+			SERVER_OFFSET.append(100)
+		else:
+			SERVER_OFFSET.append(0)
+		servers.append(server_n)
+		vidpath = lnk.split('.tv/')[1]
+		new_headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36', 'Referer':mainurl, 'Origin':'https://einthusan.tv'}
+		for i in servers:
+			urltry = ("https://s" + str(i+SERVER_OFFSET[0]) + ".einthusan.tv/" + vidpath)
+			isitworking = requests.get(urltry, headers=new_headers).status_code
+			xbmc.log(urltry, level=xbmc.LOGNOTICE)
+			xbmc.log(str(isitworking), level=xbmc.LOGNOTICE)
+			if isitworking == 200:
+				lnk = urltry
+				break
+	return lnk
+	
 def login_info(s, referurl):
     
     headers={'Host':'einthusan.tv', 'Origin':'https://einthusan.tv','Referer':referurl,'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}

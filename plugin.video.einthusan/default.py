@@ -20,10 +20,14 @@ ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 username = ADDON.getSetting('username')
 password = ADDON.getSetting('password')
 
-locationid = xbmcplugin.getSetting(int(sys.argv[1]), 'location')
+locationStr = xbmcplugin.getSetting(int(sys.argv[1]), 'location')
 Locations = ['San Francisco', 'Dallas', 'Washington D.C', 'Toronto', 'London', 'Sydney', 'No Preference']
-location = Locations[int(locationid)]
-        
+
+locationId = int(locationStr)
+if (locationId > len(Locations) - 1):
+    locationId = len(Locations) - 1
+
+location = Locations[locationId]
 BASE_URL='https://einthusan.tv'
 ##
 # Prints the main categories. Called when id is 0.

@@ -16,6 +16,8 @@ import requests
 
 # s = requests.Session()
 
+NUMBER_OF_PAGES = 3
+
 ADDON = xbmcaddon.Addon(id='plugin.video.einthusan')
 username = ADDON.getSetting('username')
 password = ADDON.getSetting('password')
@@ -81,6 +83,10 @@ def display_BluRay_listings(name, url, language, mode):
 #  Scrapes a list of movies and music videos from the website. Called when mode is 1.
 ##
 def get_movies_and_music_videos(name, url, language, mode):
+    get_movies_and_music_videos_helper(name, url, language, mode, 1)
+
+
+def get_movies_and_music_videos_helper(name, url, language, mode, page):
     xbmc.log(url, level=xbmc.LOGNOTICE)
     referurl = url
     html =  requests.get(url).text
@@ -105,10 +111,15 @@ def get_movies_and_music_videos(name, url, language, mode):
         # addDir(name, MOVIES_URL + str(movie)+'/?lang='+lang, 2, image, lang)
         addDir(name,movie,2,image,lang,trail, isplayable=True)
     if nextpage[0]!='true':
-        addDir('>>> Next Page >>>', BASE_URL+nextpage[1],1,'','')
+        nextPage_Url = BASE_URL+nextpage[1]
+        if (page > NUMBER_OF_PAGES):
+            addDir('>>> Next Page >>>', nextPage_Url,1,'','')
+        else:
+            get_movies_and_music_videos_helper(name, nextPage_Url, language, mode, page+1)
 
     xbmcplugin.endOfDirectory(int(sys.argv[1]))
     # s.close()
+
 
 ##
 # Displays the menu for mp3 music..

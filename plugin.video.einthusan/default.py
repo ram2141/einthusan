@@ -195,8 +195,18 @@ def show_featured_movies(name, url, language, mode):
 
     html = requests.get(page_url).text
     matches = re.compile('name="newrelease_tab".+?img src="(.+?)".+?href="(.+?)"><h2>(.+?)</h2>.+?i class=(.+?)</div>').findall(html)
-    
+
+    staffPicks_matches = re.compile('  <i class="(.+?)">.+?</i>.+?</i>Subtitle</p></div><a href="(.+?)"><img src="(.+?)"> </a><a href=".+?" class="title">(.+?)</a>').findall(html)
+    staffPicks_matches = staffPicks_matches[:10]
+
+    allmatches = []
     for img, id, name, ishd in matches:
+        allmatches.append((img,id,name,ishd))
+    for ishd, link, image, name in staffPicks_matches:
+        allmatches.append((image, link, name, ishd))
+
+    for img, id, name, ishd in allmatches:
+        print id 
         movieid = id.split('/')[3]
         movielang= id.split('lang=')[1]
         movie = name+','+movieid+','+movielang

@@ -21,7 +21,7 @@
 </addon>
 <addon id="plugin.video.einthusan"
        name="Einthusan"
-       version="1.3.9"
+       version="1.4.0"
        provider-name="humla">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -37,25 +37,6 @@
         <description>This XBMC plugin allows to watch Hindi and Tamil movies from Einthusan.com. Please support them.
 
         Credits to suriya222 for the thumbnails.</description>
-    </extension>
-</addon>
-<addon id="plugin.video.ustvcc"
-       name="Ustvcc"
-       version="0.1.8"
-       provider-name="humla">
-    <requires>
-        <import addon="xbmc.python" version="2.1.0"/>
-        <import addon="script.module.t0mm0.common" version="1.1.0"/>
-        <import addon="script.module.metahandler" version="1.0.0"/>
-    </requires>
-    <extension point="xbmc.python.pluginsource"
-               library="default.py">
-        <provides>video</provides>
-    </extension>
-    <extension point="xbmc.addon.metadata">
-        <platform>all</platform>
-        <summary>Watch US TV series </summary>
-        <description>Watch US TV series from ustv.cc</description>
     </extension>
 </addon>
 <addon id="repository.humla" name="humla Add-on Repository" 

@@ -44,8 +44,8 @@
     provider-name="humla">
 	<extension point="xbmc.addon.repository" name="humla Add-on Repository">
 		<info compressed="false">https://raw.githubusercontent.com/ram2141/einthusan/master/humla_repo/addons.xml</info>
-		<checksum>https://raw.githubusercontent.com/humla/canadanepal-xbmc/master/humla_repo/addons.xml.md5</checksum>
-		<datadir zip="true">https://raw.githubusercontent.com/humla/canadanepal-xbmc/master/repo/</datadir>
+		<checksum>https://raw.githubusercontent.com/ram2141/einthusan/master/humla_repo/addons.xml.md5</checksum>
+		<datadir zip="true"https://github.com/ram2141/einthusan/edit/master/repo/</datadir>
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<summary>Install Add-ons for XBMC from humla Add-on Repository</summary>

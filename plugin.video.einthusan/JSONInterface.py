@@ -10,7 +10,7 @@ import HTTPInterface
 ##
 def get_movie_detail(movie_id):
 	time.sleep(0.4)
-	API_URL = 'http://www.einthusan.com/webservice/movie.php?id=' + str(movie_id)
+	API_URL = 'https://einthusan.ca/webservice/movie.php?id=' + str(movie_id)
 	html = HTTPInterface.http_get(API_URL)
 	response_json = {}
 	try:
@@ -24,7 +24,7 @@ def get_movie_detail(movie_id):
 # returns json decoded of the response from the server
 ##
 def apply_filter(filters):
-	API_URL = 'http://www.einthusan.com/webservice/filters.php'
+	API_URL = 'https://einthusan.ca/webservice/filters.php'
 	result = HTTPInterface.http_post(API_URL, data=filters)
 	response_json = {}
 	try:
@@ -35,7 +35,7 @@ def apply_filter(filters):
 	return  response_json
 
 def get_options(attr, language):
-	API_URL = 'http://www.einthusan.com/webservice/discovery.php'
+	API_URL = 'https://einthusan.ca/webservice/discovery.php'
 	data = 'lang='+language
 
 	html = HTTPInterface.http_post(API_URL, data=data)

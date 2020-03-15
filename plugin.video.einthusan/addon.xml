@@ -2,7 +2,7 @@
 <addon id="plugin.video.einthusan"
        name="Einthusan"
        version="1.4.0"
-       provider-name="CyberBoy_Ram">
+       provider-name="humla">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.requests" version="2.7.0" />

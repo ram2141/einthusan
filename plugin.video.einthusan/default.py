@@ -447,7 +447,7 @@ def preferred_server(lnk, mainurl):
 	
 def login_info(s, referurl):
     
-    headers={'Host':'einthusan.tv', 'Origin':'https://einthusan.ca','Referer':referurl,'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
+    headers={'Host':'einthusan.tv', 'Origin':'https://einthusan.tv','Referer':referurl,'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
     
     htm = s.get('https://einthusan.tv/login/?lang=hindi', headers=headers, allow_redirects=False).content
     csrf=re.findall('data-pageid=["\'](.*?)["\']',htm)[0]

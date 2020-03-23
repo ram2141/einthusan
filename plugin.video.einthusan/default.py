@@ -379,7 +379,7 @@ def get_movie(s, mainurl, mainurlajax, headers=None):
     # htm, level=OTICE)
     lnk=re.findall('data-ejpingables=["\'](.*?)["\']',htm)[0]
 
-    r=decodeEInth(lnk)
+    
     jdata='{"EJOutcomes":"%s","NativeHLS":false}'%lnk
 
     h = HTMLParser.HTMLParser()
